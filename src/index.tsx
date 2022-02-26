@@ -1,4 +1,5 @@
 
+import { CssBaseline } from '@material-ui/core';
 import i18n from 'i18next';
 import React from 'react';
 import ReactDOM from 'react-dom';
@@ -8,8 +9,10 @@ import enTranslations from '../res/translations/en.json';
 const App = () => {
 
 	return (
-		<h1>Hello world</h1>
-	)
+		<>
+			<CssBaseline />
+		</>
+	);
 };
 
 
