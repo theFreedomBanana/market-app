@@ -1,4 +1,5 @@
 import { CssBaseline } from "@material-ui/core";
+import { ThemeProvider } from "@material-ui/styles";
 import i18n from "i18next";
 import React from "react";
 import ReactDOM from "react-dom";
@@ -13,6 +14,7 @@ import { ApplicationHeader } from "./Components/Application/Header";
 import { ApplicationSection } from "./Components/Application/Section";
 import { information as informationReducer } from "./Store/Information/reducers";
 import { sagaForFetchRequested } from "./Store/Information/sagas";
+import { theme } from "./Theme";
 
 const EMPTY_STATE = { item: {} };
 
@@ -35,8 +37,10 @@ sagaMiddleware.run(sagaForFetchRequested);
 const App = () => (
 	<>
 		<CssBaseline />
-		<ApplicationHeader />
-		<ApplicationSection />
+		<ThemeProvider theme={theme}>
+			<ApplicationHeader />
+			<ApplicationSection />
+		</ThemeProvider>
 	</>
 );
 
