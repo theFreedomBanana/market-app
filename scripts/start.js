@@ -1,9 +1,9 @@
 
-const HTMLWebpackPlugin = require('html-webpack-plugin');
-const Webpack = require('webpack');
+const HTMLWebpackPlugin = require("html-webpack-plugin");
+const Webpack = require("webpack");
 
 module.exports = (env) => {
-	const APPLICATION_ROOT_PATH = `/${env && env.APPLICATION_ROOT_PATH || '/'}`;
+	const APPLICATION_ROOT_PATH = `/${env && env.APPLICATION_ROOT_PATH || "/"}`;
 
 	return {
 		/**
@@ -32,19 +32,19 @@ module.exports = (env) => {
 		/**
 		 * Defines how source maps are generated.
 		 */
-		devtool: 'inline-source-map',
+		devtool: "inline-source-map",
 		/**
 		 * Defines which module webpack should use to start building dependency graph.
 		 */
 		entry: [
-			'react-hot-loader/patch',
-			'url-search-params-polyfill',
-			'./src/index.tsx',
+			"react-hot-loader/patch",
+			"url-search-params-polyfill",
+			"./src/index.tsx",
 		],
 		/**
 		 * Defines which mode Webpack is on.
 		 */
-		mode: 'development',
+		mode: "development",
 		/**
 		 * Defines how webpack will process each type of file.
 		 */
@@ -57,28 +57,28 @@ module.exports = (env) => {
 					exclude: /node_modules/,
 					test: /\.(js|jsx|ts|tsx)?$/,
 					use: {
-						loader: 'ts-loader',
+						loader: "ts-loader",
 					},
 				},
 				// All output '.js' files will have any sourcemaps re-processed by 'source-map-loader'.
 				{
+					enforce: "pre",
 					exclude: /node_modules/,
-					enforce: 'pre',
+					loader: "source-map-loader",
 					test: /\.js$/,
-					loader: 'source-map-loader',
 				},
 				{
 					exclude: /node_modules/,
+					loader: "svg-react-loader",
 					test: /\.svg$/,
-					loader: 'svg-react-loader',
 				},
 				{
 					test: /\.(gif|jpg|png)$/i,
-					type: 'asset/resource',
+					type: "asset/resource",
 				},
 				{
 					test: /\.(eot|otf|ttf|woff|woff2)$/,
-					type: 'asset/resource',
+					type: "asset/resource",
 				},
 				{
 					test: /\.css$/i,
@@ -93,7 +93,7 @@ module.exports = (env) => {
 			/**
 			 * Displays hot replaced module's name in console.
 			 */
-			moduleIds: 'named',
+			moduleIds: "named",
 		},
 		/**
 		 * Provides webpack a list of plugins to use.
@@ -103,17 +103,17 @@ module.exports = (env) => {
 			 * Creates global constants resolved at compile time.
 			 */
 			new Webpack.DefinePlugin({
-				'process.env': {
+				"process.env": {
 					APPLICATION_ROOT_PATH: JSON.stringify(APPLICATION_ROOT_PATH),
-					NODE_ENV: JSON.stringify('development'),
-					PLATFORM_ENV: JSON.stringify('web'),
+					NODE_ENV: JSON.stringify("development"),
+					PLATFORM_ENV: JSON.stringify("web"),
 				},
 			}),
 			// /**
 			//  * Creates an index.html file on the fly using the provided file as template.
 			//  * It adds <link> and <script> tags for every created depency.
 			//  */
-			new HTMLWebpackPlugin({ template: './src/index.html' }),
+			new HTMLWebpackPlugin({ template: "./src/index.html" }),
 		],
 		/**
 		 * Defines how Webpack will resolve imported modules.
@@ -123,21 +123,21 @@ module.exports = (env) => {
 			 * Provides a list of extensions to resolve.
 			 */
 			extensions: [
-				'.eot',
-				'.jpg',
-				'.js',
-				'.jsx',
-				'.gif',
-				'.otf',
-				'.png',
-				'.svg',
-				'.ts',
-				'.tsx',
-				'.ttf',
-				'.woff',
-				'.woff2',
+				".eot",
+				".jpg",
+				".js",
+				".jsx",
+				".gif",
+				".otf",
+				".png",
+				".svg",
+				".ts",
+				".tsx",
+				".ttf",
+				".woff",
+				".woff2",
 			],
-			fallback: { 'util': require.resolve('util/') },
+			fallback: { "util": require.resolve("util/") },
 		},
 	};
 };
