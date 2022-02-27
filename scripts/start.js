@@ -73,16 +73,10 @@ module.exports = (env) => {
 					loader: 'svg-react-loader',
 				},
 				{
-					generator: {
-						filename: 'collections/images/[name][ext]',
-					},
 					test: /\.(gif|jpg|png)$/i,
 					type: 'asset/resource',
 				},
 				{
-					generator: {
-						filename: 'collections/fonts/[name][ext]',
-					},
 					test: /\.(eot|otf|ttf|woff|woff2)$/,
 					type: 'asset/resource',
 				},
