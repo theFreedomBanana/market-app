@@ -6,12 +6,14 @@ import ReactDOM from "react-dom";
 import { initReactI18next } from "react-i18next";
 
 import enTranslations from "../res/translations/en.json";
-import { ApplicationHeader } from "./Components/Application/Header/index";
+import { ApplicationHeader } from "./Components/Application/Header";
+import { ApplicationSection } from "./Components/Application/Section";
 
 const App = () => (
 	<>
 		<CssBaseline />
 		<ApplicationHeader />
+		<ApplicationSection />
 	</>
 );
 
