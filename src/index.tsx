@@ -13,8 +13,9 @@ import enTranslations from "../res/translations/en.json";
 import { ApplicationHeader } from "./Components/Application/Header";
 import { ApplicationSection } from "./Components/Application/Section";
 import { application as applicationReducer } from "./Store/Application/reducers";
+import { feature as featureReducer } from "./Store/Feature/reducers";
 import { information as informationReducer } from "./Store/Information/reducers";
-import { sagaForFetchRequested } from "./Store/Information/sagas";
+import { sagaForFetchRequested } from "./Store/sagas";
 import { theme } from "./Theme";
 
 const EMPTY_STATE = { item: {} };
@@ -29,6 +30,7 @@ if (process.env.NODE_ENV === "development") {
 const store = createStore(
 	combineReducers({
 		applicaton: applicationReducer(),
+		feature: featureReducer(),
 		information: informationReducer(EMPTY_STATE),
 	}),
 	applyMiddleware(...middlewares),
