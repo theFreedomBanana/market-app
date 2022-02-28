@@ -1,1 +1,9 @@
-{}
+{
+	"Feature": {
+		"Items": {
+			"List": {
+				"products": "Products"
+			}
+		}
+	}
+}
