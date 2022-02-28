@@ -12,6 +12,7 @@ import createSagaMiddleware from "redux-saga";
 import enTranslations from "../res/translations/en.json";
 import { ApplicationHeader } from "./Components/Application/Header";
 import { ApplicationSection } from "./Components/Application/Section";
+import { application as applicationReducer } from "./Store/Application/reducers";
 import { information as informationReducer } from "./Store/Information/reducers";
 import { sagaForFetchRequested } from "./Store/Information/sagas";
 import { theme } from "./Theme";
@@ -27,6 +28,7 @@ if (process.env.NODE_ENV === "development") {
 
 const store = createStore(
 	combineReducers({
+		applicaton: applicationReducer(),
 		information: informationReducer(EMPTY_STATE),
 	}),
 	applyMiddleware(...middlewares),
