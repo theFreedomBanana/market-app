@@ -16,7 +16,7 @@ export const ApplicationSection = withStyles(styles)(
 
 					</Grid>
 					<Grid item md={6}>
-						<ItemsList />
+						<ItemsList label={"item.list"} />
 					</Grid>
 					<Grid item md={3}>
 

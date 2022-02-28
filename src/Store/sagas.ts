@@ -12,11 +12,16 @@ interface ActionParams {
 }
 
 function* fetchItems(actionParams: ActionParams) {
-	const { limit } = actionParams.data;
+	const { label, limit } = actionParams.data;
 	try {
-		const items = fetch(`http://localhost:3000/items?_limit=${limit || 16 }`);
+		const items = fetch(`http://localhost:3000/items?_limit=${limit || 16}`);
 		const results: Item[] = yield items.then((response) => response.json());
 		yield put({ items: results, type: ACTIONS.FETCH_SUCCEEDED });
+		yield put({
+			fetchedSlugs: results.map(({ slug }) => slug),
+			label,
+			type: ACTIONS.UPDATE_FEATURE,
+		});
 	} catch ({ message }) {
 		yield put({ message, type: ACTIONS.THROW_ERROR });
 	}

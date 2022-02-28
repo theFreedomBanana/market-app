@@ -1,12 +1,17 @@
 import { createStyles, Grid, Paper, Typography, withStyles, WithStyles } from "@material-ui/core";
-import React, { memo, useEffect, useMemo } from "react";
+import React, { memo, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { connect } from "react-redux";
 import { Dispatch } from "redux";
+import { createSelector } from "reselect";
 import { Item } from "../../../../Classes/Item";
 import { Store } from "../../../../Store";
 import { ACTIONS } from "../../../../Store/actions";
 import { ItemCard } from "../Card";
+
+interface ItemsListSetup {
+	readonly fetchedSlugs?: string[];
+}
 
 const styles = () => createStyles({
 	list__container: { padding: "1rem" },
@@ -19,34 +24,51 @@ const styles = () => createStyles({
 	},
 });
 
-const mapStateToProps = (store: Store) => ({
-	store: {
-		information: {
-			item: { ...store.information?.item },
-		},
+const selectFetchedItems = createSelector(
+	[
+		(store) => store.information.item,
+		(store) => store.feature,
+	],
+	(itemPerSlug, feature) => (label: string) => {
+		const params: ItemsListSetup | undefined = label.split(".").reduce(
+			(reduction: { [index: string]: any }, key: string): ItemsListSetup => reduction && reduction[key],
+			feature,
+		);
+
+		if (params?.fetchedSlugs) {
+
+			return params.fetchedSlugs.map((slug: string): Item => itemPerSlug[slug]);
+		} else {
+
+			return undefined;
+		}
 	},
+);
+
+const mapStateToProps = (store: Store, { label }: { label: string; }) => ({
+	items: selectFetchedItems(store)(label),
+	label,
 });
 
-type ItemsListProps = { dispatch: Dispatch; store: any } & WithStyles<typeof styles>;
+type ItemsListProps = { dispatch: Dispatch; items?: Item[]; label: string; } & WithStyles<typeof styles>;
 
 export const ItemsList = connect(mapStateToProps)(
 	withStyles(styles)(
 		memo(
-			({ classes, dispatch, store }: ItemsListProps) => {
+			({ classes, dispatch, items, label }: ItemsListProps) => {
 				const { t } = useTranslation();
 
 				useEffect(
 					() => {
-						dispatch({ data: { limit: 16 }, type: ACTIONS.FETCH_REQUESTED });
+						dispatch({ data: { label, limit: 16 }, type: ACTIONS.FETCH_REQUESTED });
 					},
-					[dispatch],
+					[dispatch, label],
 				);
 
-				const items: Item[] = useMemo(
-					() => Object.values(store?.information.item),
-					[store?.information.item],
-				);
+				if (!(items)) {
 
+					return null;
+				}
 				return (
 					<>
 						<Typography className={classes.list__title} variant="h4">{t("Feature:Items:List:products")}</Typography>
