@@ -18,6 +18,7 @@ module.exports = {
 	],
 	root: true,
 	rules: {
+		"@typescript-eslint/no-explicit-any": ["warn"],
 		"arrow-body-style": ["error", "as-needed"],
 		"arrow-parens": ["error", "always"],
 		"comma-dangle": ["error", "always-multiline"],
