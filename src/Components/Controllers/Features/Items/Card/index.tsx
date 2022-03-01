@@ -1,6 +1,6 @@
 import { createStyles, Typography, withStyles, WithStyles } from "@material-ui/core";
 import React, { memo } from "react";
-import { Item } from "../../../../Classes/Item";
+import { Item } from "../../../../../Classes/Item";
 
 const styles = () => createStyles({
 	card__itemImage: { maxWidth: "100%" },

@@ -1,7 +1,7 @@
 import { createStyles, Grid, withStyles, WithStyles } from "@material-ui/core";
 import React, { memo } from "react";
 
-import { ItemsList } from "../../Features/Items/List";
+import { ItemsList } from "../../Controllers/Features/Items/List";
 
 const styles = () => createStyles({
 	section__container: { backgroundColor: "#FAFAFA", padding: "3rem 6rem" },

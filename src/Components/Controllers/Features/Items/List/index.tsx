@@ -4,11 +4,11 @@ import { useTranslation } from "react-i18next";
 import { connect } from "react-redux";
 import { Dispatch } from "redux";
 import { createSelector } from "reselect";
-import { Item } from "../../../../Classes/Item";
-import { Store } from "../../../../Store";
-import { ACTIONS } from "../../../../Store/actions";
+import { Item } from "../../../../../Classes/Item";
+import { Store } from "../../../../../Store";
+import { ACTIONS } from "../../../../../Store/actions";
 import { ItemCard } from "../Card";
-import { Pagination } from "./views";
+import { Pagination } from "../../../Utility/Pagination";
 
 // #region TYPES
 interface ItemsListSetup {
@@ -35,7 +35,7 @@ type ItemsListProps = { dispatch: Dispatch; label: string; items?: Item[]; setup
 
 // #region CONSTANTS
 const selectFeatureSetup = createSelector(
-	[(store) => store.feature],
+	[(store) => store.controllers.feature],
 	(feature) => (label: string) => {
 		const params: ItemsListSetup | undefined = label.split(".").reduce(
 			(reduction: { [index: string]: any }, key: string) => reduction && reduction[key],
@@ -49,7 +49,7 @@ const selectFeatureSetup = createSelector(
 const selectFetchedItems = createSelector(
 	[
 		(store) => store.information.item,
-		(store) => store.feature,
+		(store) => store.controllers.feature,
 	],
 	(itemPerSlug, feature) => (label: string) => {
 		const params: ItemsListSetup | undefined = label.split(".").reduce(
