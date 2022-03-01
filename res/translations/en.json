@@ -2,6 +2,8 @@
 	"Feature": {
 		"Items": {
 			"List": {
+				"next": "Next",
+				"previous": "Prev",
 				"products": "Products"
 			}
 		}
