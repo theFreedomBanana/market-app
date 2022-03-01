@@ -5,9 +5,11 @@
 				"add": "Add"
 			},
 			"List": {
+				"mug": "Mug",
 				"next": "Next",
 				"previous": "Prev",
-				"products": "Products"
+				"products": "Products",
+				"shirt": "Shirt"
 			}
 		}
 	}
