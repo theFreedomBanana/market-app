@@ -1,6 +1,9 @@
 {
 	"Feature": {
 		"Items": {
+			"Card": {
+				"add": "Add"
+			},
 			"List": {
 				"next": "Next",
 				"previous": "Prev",

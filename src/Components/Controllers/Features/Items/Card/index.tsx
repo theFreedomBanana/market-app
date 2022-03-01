@@ -1,50 +1,124 @@
 import { createStyles, Typography, withStyles, WithStyles } from "@material-ui/core";
-import React, { memo } from "react";
+import React, { memo, useCallback } from "react";
+import { connect } from "react-redux";
+import { Dispatch } from "redux";
+import { useTranslation } from "react-i18next";
+import { createSelector } from "reselect";
 import { Item } from "../../../../../Classes/Item";
+import { Store } from "../../../../../Store";
+import { ACTIONS } from "../../../../../Store/actions";
 
+// #region TYPE
+type ItemCardProps = { dispatch: Dispatch; item: Item; itemsInCart?: Item[]; label: string; } & WithStyles<typeof styles>;
+// #endregion
+
+// #region CONSTANTS
 const styles = () => createStyles({
+	card__button: {
+		"&:hover": {
+			boxShadow: "0px 4px 4px 0px rgba(0, 0, 0, .25)",
+			cursor: "pointer",
+		},
+		backgroundColor: "#1EA4CE",
+		border: "none",
+		borderRadius: "2px",
+		color: "#FFFFFF",
+		fontSize: "0.9rem",
+		fontWeight: 600,
+		lineHeight: "1.3rem",
+		padding: "0.3rem 0",
+		width: "100%",
+	},
+	card__container: { display: "flex", flexDirection: "column", height: "100%", justifyContent: "space-between" },
 	card__itemImage: { maxWidth: "100%" },
 	card__itemImageContainer: {
 		backgroundColor: "#FEFEFE",
 		border: "1.18px solid #F3F0FE",
 		borderRadius: "12px",
 		display: "flex",
-		marginBottom: "0.5rem",
+		marginBottom: "0.7rem",
 		padding: "1rem",
 	},
 	card__itemName: {
 		color: "#191919",
+		flexGrow: 2,
 		fontWeight: 600,
+		marginBottom: "0.7rem",
 	},
 	card__itemPrice: {
 		color: "#1EA4CE",
 		display: "inline",
-		marginBottom: "0.5rem",
+		marginBottom: "0.7rem",
 	},
 	card__itemPriceText: { fontWeight: 700 },
 });
 
-interface ItemCardProps {
-	readonly item: Item;
-}
+const selectItemsInCart = createSelector(
+	[(store) => store.controllers.feature],
+	(feature) => (label: string) => {
+		const params: { items?: Item[] } | undefined = label.split(".").reduce(
+			(reduction: { [index: string]: any }, key: string) => reduction && reduction[key],
+			feature,
+		);
 
-export const ItemCard = withStyles(styles)(
-	memo(
-		({ classes, item }: WithStyles<typeof styles> & ItemCardProps) => (
-			<div>
-				<div className={classes.card__itemImageContainer}>
-					<img alt="Nicholas Cage" className={classes.card__itemImage} src="https://www.placecage.com/640/640" />
-				</div>
-				<Typography className={classes.card__itemPrice}>&#8378; </Typography>
-				<Typography
-					className={`${classes.card__itemPrice} ${classes.card__itemPriceText}`}
-				>
-					{item.price}
-				</Typography>
-				<Typography className={classes.card__itemName}>{item.name}</Typography>
-			</div>
+		return params?.items;
+	},
+);
+
+const mapStateToProps = (store: Store, { label }: { label: string; }) => ({
+	itemsInCart: selectItemsInCart(store)("cart"),
+	label,
+});
+
+// #endregion
+
+// #region COMPONENT
+/**
+ * A feature that displays infos about an item
+ */
+export const ItemCard = connect(mapStateToProps)(
+	withStyles(styles)(
+		memo(
+			({ classes, dispatch, item, itemsInCart }: ItemCardProps) => {
+				const { t } = useTranslation();
+
+				// #region EVENTS
+				const addItemToCart = useCallback(
+					(item: Item) => {
+						dispatch({ items: (itemsInCart || []).concat(item), label: "cart", type: ACTIONS.UPDATE_FEATURE });
+					},
+					[dispatch, itemsInCart],
+				);
+				// #endregion
+
+				// #region RENDERING
+				return (
+					<div className={classes.card__container}>
+						<div className={classes.card__itemImageContainer}>
+							<img alt="Nicholas Cage" className={classes.card__itemImage} src="https://www.placecage.com/640/640" />
+						</div>
+						<div>
+							<Typography className={classes.card__itemPrice}>&#8378; </Typography>
+							<Typography
+								className={`${classes.card__itemPrice} ${classes.card__itemPriceText}`}
+							>
+								{item.price}
+							</Typography>
+						</div>
+						<Typography className={classes.card__itemName}>{item.name}</Typography>
+						<button
+							className={classes.card__button}
+							onClick={() => addItemToCart(item)}
+						>
+							{t("Feature:Items:Card:add")}
+						</button>
+					</div>
+				);
+				// #endregion
+			},
 		),
 	),
 );
+// #endregion
 
 ItemCard.displayName = "itemCard";
