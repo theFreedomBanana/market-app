@@ -9,7 +9,14 @@ import { Store } from "../../../../../Store";
 import { ACTIONS } from "../../../../../Store/actions";
 
 // #region TYPE
-type ItemCardProps = { dispatch: Dispatch; item: Item; itemsInCart?: Item[]; label: string; } & WithStyles<typeof styles>;
+type ItemCardProps = {
+	articleInCartPerItemSlug?: {
+		[index: string]: { count: number };
+	};
+	dispatch: Dispatch;
+	item: Item;
+	label: string;
+} & WithStyles<typeof styles>;
 // #endregion
 
 // #region CONSTANTS
@@ -56,17 +63,17 @@ const styles = () => createStyles({
 const selectItemsInCart = createSelector(
 	[(store) => store.controllers.feature],
 	(feature) => (label: string) => {
-		const params: { items?: Item[] } | undefined = label.split(".").reduce(
+		const params: { articlePerItemSlug?: { [index: string]: { count: number } } } | undefined = label.split(".").reduce(
 			(reduction: { [index: string]: any }, key: string) => reduction && reduction[key],
 			feature,
 		);
 
-		return params?.items;
+		return params?.articlePerItemSlug;
 	},
 );
 
 const mapStateToProps = (store: Store, { label }: { label: string; }) => ({
-	itemsInCart: selectItemsInCart(store)("cart"),
+	articleInCartPerItemSlug: selectItemsInCart(store)("cart"),
 	label,
 });
 
@@ -79,15 +86,21 @@ const mapStateToProps = (store: Store, { label }: { label: string; }) => ({
 export const ItemCard = connect(mapStateToProps)(
 	withStyles(styles)(
 		memo(
-			({ classes, dispatch, item, itemsInCart }: ItemCardProps) => {
+			({ classes, dispatch, item, articleInCartPerItemSlug }: ItemCardProps) => {
 				const { t } = useTranslation();
 
 				// #region EVENTS
 				const addItemToCart = useCallback(
 					(item: Item) => {
-						dispatch({ items: (itemsInCart || []).concat(item), label: "cart", type: ACTIONS.UPDATE_FEATURE });
+						const newArticlePerItemSlug = {
+							...articleInCartPerItemSlug,
+							[item.slug]: {
+								count: (articleInCartPerItemSlug?.[item.slug]?.count || 0) + 1,
+							},
+						};
+						dispatch({ articlePerItemSlug: newArticlePerItemSlug, label: "cart", type: ACTIONS.UPDATE_FEATURE });
 					},
-					[dispatch, itemsInCart],
+					[dispatch, articleInCartPerItemSlug],
 				);
 				// #endregion
 
