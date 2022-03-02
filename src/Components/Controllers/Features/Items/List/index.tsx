@@ -1,4 +1,5 @@
 import { createStyles, Grid, Paper, Typography, withStyles, WithStyles } from "@material-ui/core";
+import { CircularProgress } from "@mui/material";
 import clsx from "clsx";
 import React, { ChangeEvent, memo, useCallback, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
@@ -123,6 +124,15 @@ const styles = () => createStyles({
 	},
 	"list__filterItem--disabled": { backgroundColor: "#F2F0FD", color: "#1EA4CE" },
 	"list__filterItem--enabled": { backgroundColor: "#1EA4CE", color: "#FFFFFF" },
+	"list__loaderContainer": {
+		bottom: 0,
+		left: 0,
+		margin: "auto",
+		position: "absolute",
+		right: 0,
+		top: 0,
+	},
+	list__loaderSvg: { color: "#1EA4CE" },
 	list__sortRadio: { marginBottom: "2rem" },
 	list__title: {
 		backgroundColor: "#FAFAFA",
@@ -319,10 +329,6 @@ export const ItemsList = connect(mapStateToProps)(
 				// #endregion
 
 				// #region RENDERING
-				if (!(items)) {
-
-					return null;
-				}
 				return (
 					<Grid container spacing={2}>
 						<Grid item md={3}>
@@ -371,16 +377,31 @@ export const ItemsList = connect(mapStateToProps)(
 									{t("Feature:Items:List:shirt")}
 								</div>
 							</div>
-							<Paper className={classes.list__container} elevation={2}>
-								<Grid container spacing={2}>
-									{items.map((item) => (
-										<Grid item key={item.slug} md={3}>
-											<ItemCard item={item} label="cart" />
-										</Grid>
-									))}
-								</Grid>
-							</Paper>
-							<Pagination currentPage={currentPage} navigateToPage={navigateToPage} pageCount={pageCount} />
+							{!(items)
+								? (
+									<CircularProgress classes={{
+										root: classes.list__loaderContainer,
+										svg: classes.list__loaderSvg,
+									}} />
+								) : (
+									<>
+										<Paper className={classes.list__container} elevation={2}>
+											<Grid container spacing={2}>
+												{items.map((item) => (
+													<Grid item key={item.slug} md={3}>
+														<ItemCard item={item} label="cart" />
+													</Grid>
+												))}
+											</Grid>
+										</Paper>
+										<Pagination
+											currentPage={currentPage}
+											navigateToPage={navigateToPage}
+											pageCount={pageCount}
+										/>
+									</>
+								)
+							}
 						</Grid>
 					</Grid>
 				);
