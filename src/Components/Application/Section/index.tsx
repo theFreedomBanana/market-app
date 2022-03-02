@@ -13,10 +13,7 @@ export const ApplicationSection = withStyles(styles)(
 		({ classes }: WithStyles<typeof styles>) => (
 			<div className={classes.section__container}>
 				<Grid container spacing={2}>
-					<Grid item md={3}>
-
-					</Grid>
-					<Grid item md={6}>
+					<Grid item md={9}>
 						<ItemsList label="item.list" />
 					</Grid>
 					<Grid item md={3}>

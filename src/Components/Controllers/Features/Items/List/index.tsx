@@ -1,6 +1,6 @@
 import { createStyles, Grid, Paper, Typography, withStyles, WithStyles } from "@material-ui/core";
 import clsx from "clsx";
-import React, { memo, useCallback, useEffect, useMemo } from "react";
+import React, { ChangeEvent, memo, useCallback, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { connect } from "react-redux";
 import { Dispatch } from "redux";
@@ -10,6 +10,7 @@ import { Store } from "../../../../../Store";
 import { ACTIONS } from "../../../../../Store/actions";
 import { ItemCard } from "../Card";
 import { Pagination } from "../../../Utility/Pagination";
+import { SortRadio } from "../../../Utility/SortRadio";
 
 // #region TYPES
 interface ItemsListSetup {
@@ -17,6 +18,10 @@ interface ItemsListSetup {
 	 * The total amount of items in DB
 	 */
 	readonly count?: number;
+	/**
+	 * An array containing the slugs of the previous request
+	 */
+	readonly fetchedSlugs?: string[];
 	/**
 	 * The filter used to fetch items
 	 */
@@ -26,9 +31,9 @@ interface ItemsListSetup {
 	 */
 	readonly limit?: number;
 	/**
-	 * An array containing the slugs of the previous request
+	 * Defines how the items are sorted when requested
 	 */
-	readonly fetchedSlugs?: string[];
+	readonly sort?: string;
 	/**
 	 * The position where the previous request was started
 	 */
@@ -121,6 +126,7 @@ export const ItemsList = connect(mapStateToProps)(
 								filter: { key: "itemType", value: ItemType.MUG },
 								label,
 								limit: 16,
+								sort: "_sort=price&_order=asc",
 								start: 0,
 							},
 							type: ACTIONS.FETCH_REQUESTED,
@@ -139,6 +145,14 @@ export const ItemsList = connect(mapStateToProps)(
 					() => setup?.count ? Math.floor(setup?.count / 16) : 0,
 					[setup?.count],
 				);
+
+				const sortOptions = useMemo(
+					() => ["lowToHigh", "highToLow", "newToOld", "oldToNew"].map((id) => ({
+						id,
+						text: t(`Feature:Items:List:${id}`),
+					})),
+					[t],
+				);
 				// #endregion
 
 				// #region EVENTS
@@ -146,12 +160,18 @@ export const ItemsList = connect(mapStateToProps)(
 					(pageNumber: number) => {
 						if (setup?.limit) {
 							dispatch({
-								data: { filter: setup?.filter, label, limit: setup?.limit, start: pageNumber * setup?.limit },
+								data: {
+									filter: setup?.filter,
+									label,
+									limit: setup?.limit,
+									sort: setup?.sort,
+									start: pageNumber * setup?.limit,
+								},
 								type: ACTIONS.FETCH_REQUESTED,
 							});
 						}
 					},
-					[dispatch, label, setup?.filter, setup?.limit],
+					[dispatch, label, setup?.filter, setup?.limit, setup?.sort],
 				);
 
 				const searchItemsWithItemType = useCallback(
@@ -161,12 +181,44 @@ export const ItemsList = connect(mapStateToProps)(
 								filter: { key: "itemType", value: itemType },
 								label,
 								limit: setup?.limit,
+								sort: setup?.sort,
 								start: 0,
 							},
 							type: ACTIONS.FETCH_REQUESTED,
 						});
 					},
-					[dispatch, label, setup?.limit],
+					[dispatch, label, setup?.limit, setup?.sort],
+				);
+
+				const searchItemsBy = useCallback(
+					(event: ChangeEvent<HTMLInputElement>) => {
+						let sort;
+						switch (event.currentTarget.value) {
+						case "lowToHigh":
+							sort = "_sort=price&_order=asc";
+							break;
+						case "highToLow":
+							sort = "_sort=price&_order=desc";
+							break;
+						case "newToOld":
+							sort = "_sort=added&_order=desc";
+							break;
+						case "oldToNew":
+							sort = "_sort=added&_order=asc";
+							break;
+						}
+						dispatch({
+							data: {
+								filter: setup?.filter,
+								label,
+								limit: setup?.limit,
+								sort,
+								start: 0,
+							},
+							type: ACTIONS.FETCH_REQUESTED,
+						});
+					},
+					[dispatch, label, setup?.filter, setup?.limit],
 				);
 				// #endregion
 
@@ -176,44 +228,55 @@ export const ItemsList = connect(mapStateToProps)(
 					return null;
 				}
 				return (
-					<>
-						<Typography className={classes.list__title} variant="h4">{t("Feature:Items:List:products")}</Typography>
-						<div className={classes.list__filterContainer}>
-							<div
-								className={clsx(
-									classes.list__filterItem,
-									setup?.filter?.value === ItemType.MUG ? classes["list__filterItem--enabled"] : classes["list__filterItem--disabled"],
-								)}
-								onClick={() => searchItemsWithItemType(ItemType.MUG)}
-							>
-								{t("Feature:Items:List:mug")}
+					<Grid container spacing={2}>
+						<Grid item md={3}>
+							<SortRadio
+								defaultOption={sortOptions[0]}
+								label={t("Feature:Items:List:sorting")}
+								onChangeEventHandler={searchItemsBy}
+								options={sortOptions}
+							/>
+						</Grid>
+						<Grid item md={9}>
+							<Typography className={classes.list__title} variant="h4">{t("Feature:Items:List:products")}</Typography>
+							<div className={classes.list__filterContainer}>
+								<div
+									className={clsx(
+										classes.list__filterItem,
+										setup?.filter?.value === ItemType.MUG ? classes["list__filterItem--enabled"] : classes["list__filterItem--disabled"],
+									)}
+									onClick={() => searchItemsWithItemType(ItemType.MUG)}
+								>
+									{t("Feature:Items:List:mug")}
+								</div>
+								<div
+									className={clsx(
+										classes.list__filterItem,
+										setup?.filter?.value === ItemType.SHIRT ? classes["list__filterItem--enabled"] : classes["list__filterItem--disabled"],
+									)}
+									onClick={() => searchItemsWithItemType(ItemType.SHIRT)}
+								>
+									{t("Feature:Items:List:shirt")}
+								</div>
 							</div>
-							<div
-								className={clsx(
-									classes.list__filterItem,
-									setup?.filter?.value === ItemType.SHIRT ? classes["list__filterItem--enabled"] : classes["list__filterItem--disabled"],
-								)}
-								onClick={() => searchItemsWithItemType(ItemType.SHIRT)}
-							>
-								{t("Feature:Items:List:shirt")}
-							</div>
-						</div>
-						<Paper className={classes.list__container} elevation={2}>
-							<Grid container spacing={2}>
-								{items.map((item) => (
-									<Grid item key={item.slug} md={3}>
-										<ItemCard item={item} label="cart" />
-									</Grid>
-								))}
-							</Grid>
-						</Paper>
-						<Pagination currentPage={currentPage} navigateToPage={navigateToPage} pageCount={pageCount} />
-					</>
+							<Paper className={classes.list__container} elevation={2}>
+								<Grid container spacing={2}>
+									{items.map((item) => (
+										<Grid item key={item.slug} md={3}>
+											<ItemCard item={item} label="cart" />
+										</Grid>
+									))}
+								</Grid>
+							</Paper>
+							<Pagination currentPage={currentPage} navigateToPage={navigateToPage} pageCount={pageCount} />
+						</Grid>
+					</Grid>
 				);
 				// #endregion
 			},
 		),
 	),
 );
+// #endregion
 
 ItemsList.displayName = "itemsList";

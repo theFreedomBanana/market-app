@@ -5,11 +5,16 @@
 				"add": "Add"
 			},
 			"List": {
+				"highToLow": "Price high to low",
+				"lowToHigh": "Price low to High",
 				"mug": "Mug",
 				"next": "Next",
+				"newToOld": "New to Old",
+				"oldToNew": "Old to new",
 				"previous": "Prev",
 				"products": "Products",
-				"shirt": "Shirt"
+				"shirt": "Shirt",
+				"sorting": "Sorting"
 			}
 		}
 	}
