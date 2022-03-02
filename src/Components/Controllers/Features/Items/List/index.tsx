@@ -10,10 +10,11 @@ import { Company } from "../../../../../Classes/Company";
 import { Item, ItemType } from "../../../../../Classes/Item";
 import { Store } from "../../../../../Store";
 import { ACTIONS } from "../../../../../Store/actions";
-import { ItemCard } from "../Card";
 import { Pagination } from "../../../Utility/Pagination";
 import { FilterCheckbox } from "../../../Utility/FilterCheckbox";
 import { SortRadio } from "../../../Utility/SortRadio";
+import { Cart } from "../../Cart";
+import { ItemCard } from "../Card";
 
 // #region TYPES
 interface ItemsListSetup {
@@ -351,7 +352,7 @@ export const ItemsList = connect(mapStateToProps)(
 								textInputOnChangeEventHandler={updateManufacturersFilterList}
 							/>
 						</Grid>
-						<Grid item md={9}>
+						<Grid item md={6}>
 							<Typography className={classes.list__title} variant="h4">{t("Feature:Items:List:products")}</Typography>
 							<div className={classes.list__filterContainer}>
 								<div
@@ -402,6 +403,9 @@ export const ItemsList = connect(mapStateToProps)(
 									</>
 								)
 							}
+						</Grid>
+						<Grid item md={3}>
+							<Cart label="cart" />
 						</Grid>
 					</Grid>
 				);
