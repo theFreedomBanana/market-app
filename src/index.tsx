@@ -42,7 +42,7 @@ const App = () => (
 	<>
 		<CssBaseline />
 		<ThemeProvider theme={theme}>
-			<ApplicationHeader />
+			<ApplicationHeader label="header" />
 			<ApplicationSection />
 		</ThemeProvider>
 	</>
