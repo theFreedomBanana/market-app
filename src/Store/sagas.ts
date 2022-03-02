@@ -1,13 +1,16 @@
 import { put, takeEvery } from "redux-saga/effects";
-
+import { ClassEnumeration, ValueOf } from "../Classes";
 import { ACTIONS } from "./actions";
-import { Item } from "../Classes/Item";
 
-interface ActionParams {
+interface FetchRecordsParams {
 	/**
 	 * A list of additional params for the action
 	 */
 	readonly data: {
+		/**
+		 * The fetched model
+		 */
+		readonly className: string;
 		/**
 		 * A list of filters for the request
 		 */
@@ -15,11 +18,11 @@ interface ActionParams {
 			/**
 			 * The attribute to filter on
 			 */
-			key: string;
+			readonly key: string;
 			/**
 			 * The value used to filter
 			 */
-			value: string;
+			readonly value: string;
 		}[];
 		/**
 		 * The name of the component fetching the data
@@ -37,11 +40,11 @@ interface ActionParams {
 			/**
 			 * The attribute to sort by
 			 */
-			key: string;
+			readonly key: string;
 			/**
 			 * The value defining how to sort
 			 */
-			value: string;
+			readonly value: string;
 		};
 		/**
 		 * Where the request should start
@@ -58,25 +61,25 @@ interface ActionParams {
 	readonly type: typeof ACTIONS;
 }
 
-function* fetchRecords(actionParams: ActionParams) {
-	const { label, table } = actionParams.data;
+function* fetchRecords(actionParams: FetchRecordsParams) {
+	const { className, label, table } = actionParams.data;
 	const start = actionParams.data.start ? `&_start=${actionParams.data.start}` : "";
 	const limit = actionParams.data.limit ? `&_limit=${actionParams.data.limit}` : "";
 	const filter = actionParams.data.filters
 		? actionParams.data.filters.reduce(
-			(reduction: string, { key, value }: Required<ActionParams["data"]>["filters"][0]) => reduction + `&${key}_like=${value}`,
+			(reduction: string, { key, value }: Required<FetchRecordsParams["data"]>["filters"][0]) => reduction + `&${key}_like=${value}`,
 			"",
 		) : "";
 	const sort = actionParams.data.sort ? `&_sort=${actionParams.data.sort.key}&_order=${actionParams.data.sort.value}` : "";
 	try {
-		const items = fetch(`http://localhost:3000/${table}?${start}${limit}${filter}${sort}`);
-		const results: Item[] = yield items.then((response) => response.json());
-		const count: string = yield items.then((response) => response.headers.get("X-Total-Count"));
-		yield put({ [table]: results, type: ACTIONS.FETCH_SUCCEEDED });
+		const asyncDbRequest = fetch(`http://localhost:3000/${table}?${start}${limit}${filter}${sort}`);
+		const records: ValueOf<ClassEnumeration>[] = yield asyncDbRequest.then((response) => response.json());
+		const count: string = yield asyncDbRequest.then((response) => response.headers.get("X-Total-Count"));
+		yield put({ className, records, type: ACTIONS.FETCH_SUCCEEDED });
 		if (label) {
 			yield put({
 				count: parseInt(count, 10),
-				fetchedSlugs: results.map(({ slug }) => slug),
+				fetchedSlugs: records.map(({ slug }) => slug),
 				filters: actionParams.data.filters,
 				label,
 				limit: actionParams.data.limit,

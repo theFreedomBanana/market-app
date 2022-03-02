@@ -1,7 +1,7 @@
-import { Item } from "../../Classes/Item";
+import { ClassEnumeration } from "../../Classes";
 
-export interface InformationState {
-	readonly item: {
-		[slug: string]: Item;
-	}
-}
+export type InformationState = {
+	readonly [key in keyof ClassEnumeration]?: {
+		[slug: string]: ClassEnumeration[key];
+	};
+};
