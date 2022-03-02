@@ -25,7 +25,7 @@ interface ItemsListSetup {
 	/**
 	 * The filter used to fetch items
 	 */
-	readonly filter?: { key: string; value: string };
+	readonly filters?: { key: string; value: string }[];
 	/**
 	 * The maximum number of items fetched in each request
 	 */
@@ -99,6 +99,7 @@ const styles = () => createStyles({
 	},
 	"list__filterItem--disabled": { backgroundColor: "#F2F0FD", color: "#1EA4CE" },
 	"list__filterItem--enabled": { backgroundColor: "#1EA4CE", color: "#FFFFFF" },
+	list__sortRadio: { marginBottom: "2rem" },
 	list__title: {
 		backgroundColor: "#FAFAFA",
 		color: "#6F6F6F",
@@ -123,11 +124,12 @@ export const ItemsList = connect(mapStateToProps)(
 					() => {
 						dispatch({
 							data: {
-								filter: { key: "itemType", value: ItemType.MUG },
+								filters: [{ key: "itemType", value: ItemType.MUG }],
 								label,
 								limit: 16,
-								sort: "_sort=price&_order=asc",
+								sort: { key: "price", value: "asc" },
 								start: 0,
+								table: "items",
 							},
 							type: ACTIONS.FETCH_REQUESTED,
 						});
@@ -161,33 +163,35 @@ export const ItemsList = connect(mapStateToProps)(
 						if (setup?.limit) {
 							dispatch({
 								data: {
-									filter: setup?.filter,
+									filters: setup?.filters,
 									label,
 									limit: setup?.limit,
 									sort: setup?.sort,
 									start: pageNumber * setup?.limit,
+									table: "items",
 								},
 								type: ACTIONS.FETCH_REQUESTED,
 							});
 						}
 					},
-					[dispatch, label, setup?.filter, setup?.limit, setup?.sort],
+					[dispatch, label, setup?.filters, setup?.limit, setup?.sort],
 				);
 
 				const searchItemsWithItemType = useCallback(
 					(itemType: ItemType) => {
 						dispatch({
 							data: {
-								filter: { key: "itemType", value: itemType },
+								filters: (setup?.filters?.filter((filter) => filter.key !== "itemType") || []).concat({ key: "itemType", value: itemType }),
 								label,
 								limit: setup?.limit,
 								sort: setup?.sort,
 								start: 0,
+								table: "items",
 							},
 							type: ACTIONS.FETCH_REQUESTED,
 						});
 					},
-					[dispatch, label, setup?.limit, setup?.sort],
+					[dispatch, label, setup?.filters, setup?.limit, setup?.sort],
 				);
 
 				const searchItemsBy = useCallback(
@@ -195,30 +199,31 @@ export const ItemsList = connect(mapStateToProps)(
 						let sort;
 						switch (event.currentTarget.value) {
 						case "lowToHigh":
-							sort = "_sort=price&_order=asc";
+							sort = { key: "price", value: "asc" };
 							break;
 						case "highToLow":
-							sort = "_sort=price&_order=desc";
+							sort = { key: "price", value: "desc" };
 							break;
 						case "newToOld":
-							sort = "_sort=added&_order=desc";
+							sort = { key: "added", value: "desc" };
 							break;
 						case "oldToNew":
-							sort = "_sort=added&_order=asc";
+							sort = { key: "added", value: "asc" };
 							break;
 						}
 						dispatch({
 							data: {
-								filter: setup?.filter,
+								filters: setup?.filters,
 								label,
 								limit: setup?.limit,
 								sort,
 								start: 0,
+								table: "items",
 							},
 							type: ACTIONS.FETCH_REQUESTED,
 						});
 					},
-					[dispatch, label, setup?.filter, setup?.limit],
+					[dispatch, label, setup?.filters, setup?.limit],
 				);
 				// #endregion
 
@@ -231,6 +236,11 @@ export const ItemsList = connect(mapStateToProps)(
 					<Grid container spacing={2}>
 						<Grid item md={3}>
 							<SortRadio
+								custom={{
+									formControlProps: {
+										classes: { root: classes.list__sortRadio },
+									},
+								}}
 								defaultOption={sortOptions[0]}
 								label={t("Feature:Items:List:sorting")}
 								onChangeEventHandler={searchItemsBy}
@@ -243,7 +253,9 @@ export const ItemsList = connect(mapStateToProps)(
 								<div
 									className={clsx(
 										classes.list__filterItem,
-										setup?.filter?.value === ItemType.MUG ? classes["list__filterItem--enabled"] : classes["list__filterItem--disabled"],
+										setup?.filters?.find(({ key, value }) => key === "itemType" && value === ItemType.MUG)
+											? classes["list__filterItem--enabled"]
+											: classes["list__filterItem--disabled"],
 									)}
 									onClick={() => searchItemsWithItemType(ItemType.MUG)}
 								>
@@ -252,7 +264,9 @@ export const ItemsList = connect(mapStateToProps)(
 								<div
 									className={clsx(
 										classes.list__filterItem,
-										setup?.filter?.value === ItemType.SHIRT ? classes["list__filterItem--enabled"] : classes["list__filterItem--disabled"],
+										setup?.filters?.find(({ key, value }) => key === "itemType" && value === ItemType.SHIRT)
+											? classes["list__filterItem--enabled"]
+											: classes["list__filterItem--disabled"],
 									)}
 									onClick={() => searchItemsWithItemType(ItemType.SHIRT)}
 								>
