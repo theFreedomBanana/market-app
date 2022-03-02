@@ -5,11 +5,13 @@ import { useTranslation } from "react-i18next";
 import { connect } from "react-redux";
 import { Dispatch } from "redux";
 import { createSelector } from "reselect";
+import { Company } from "../../../../../Classes/Company";
 import { Item, ItemType } from "../../../../../Classes/Item";
 import { Store } from "../../../../../Store";
 import { ACTIONS } from "../../../../../Store/actions";
 import { ItemCard } from "../Card";
 import { Pagination } from "../../../Utility/Pagination";
+import { FilterCheckbox } from "../../../Utility/FilterCheckbox";
 import { SortRadio } from "../../../Utility/SortRadio";
 
 // #region TYPES
@@ -31,6 +33,14 @@ interface ItemsListSetup {
 	 */
 	readonly limit?: number;
 	/**
+	 * The text typed in the brans filter search input
+	 */
+	readonly manufacturerFilterSearchedtext?: string;
+	/**
+	 * A list of companies to filter on when searching for items
+	 */
+	readonly selectedCompanies?: string[];
+	/**
 	 * Defines how the items are sorted when requested
 	 */
 	readonly sort?: string;
@@ -40,11 +50,15 @@ interface ItemsListSetup {
 	readonly start?: number;
 }
 
-type ItemsListProps = { dispatch: Dispatch; label: string; items?: Item[]; setup?: ItemsListSetup } & WithStyles<typeof styles>;
+type ItemsListProps = {
+	companies?: Company[];
+	dispatch: Dispatch;
+	label: string;
+	items?: Item[]; setup?: ItemsListSetup } & WithStyles<typeof styles>;
 // #endregion
 
 // #region CONSTANTS
-const selectFeatureSetup = createSelector(
+const selectSetup = createSelector(
 	[(store) => store.controllers.feature],
 	(feature) => (label: string) => {
 		const params: ItemsListSetup | undefined = label.split(".").reduce(
@@ -56,7 +70,7 @@ const selectFeatureSetup = createSelector(
 	},
 );
 
-const selectFetchedItems = createSelector(
+const selectItems = createSelector(
 	[
 		(store) => store.information.item,
 		(store) => store.controllers.feature,
@@ -77,10 +91,20 @@ const selectFetchedItems = createSelector(
 	},
 );
 
+const selectCompanies = createSelector(
+	[(store) => store.information.company],
+	(companyPerSlug) => {
+		const companies: Company[] | undefined = companyPerSlug ? Object.values(companyPerSlug) : undefined;
+
+		return companies;
+	},
+);
+
 const mapStateToProps = (store: Store, { label }: { label: string; }) => ({
-	items: selectFetchedItems(store)(label),
+	companies: selectCompanies(store),
+	items: selectItems(store)(label),
 	label,
-	setup: selectFeatureSetup(store)(label),
+	setup: selectSetup(store)(label),
 });
 
 const styles = () => createStyles({
@@ -117,13 +141,14 @@ const styles = () => createStyles({
 export const ItemsList = connect(mapStateToProps)(
 	withStyles(styles)(
 		memo(
-			({ classes, dispatch, items, label, setup }: ItemsListProps) => {
+			({ classes, companies, dispatch, items, label, setup }: ItemsListProps) => {
 				const { t } = useTranslation();
 
 				useEffect(
 					() => {
 						dispatch({
 							data: {
+								className: "item",
 								filters: [{ key: "itemType", value: ItemType.MUG }],
 								label,
 								limit: 16,
@@ -133,6 +158,8 @@ export const ItemsList = connect(mapStateToProps)(
 							},
 							type: ACTIONS.FETCH_REQUESTED,
 						});
+
+						dispatch({ data: { className: "company", table: "companies" }, type: ACTIONS.FETCH_REQUESTED });
 					},
 					[dispatch, label],
 				);
@@ -155,6 +182,17 @@ export const ItemsList = connect(mapStateToProps)(
 					})),
 					[t],
 				);
+
+				const manufacturerFilterOptions = useMemo(
+					() => (companies || [])
+						.map(({ name, slug }) => ({
+							checked: setup?.selectedCompanies?.includes(slug) || false,
+							id: slug,
+							textPrimary: name,
+						}))
+						.filter(({ textPrimary }) => textPrimary.toLowerCase().includes(setup?.manufacturerFilterSearchedtext?.toLowerCase() || "")),
+					[companies, setup?.selectedCompanies, setup?.manufacturerFilterSearchedtext],
+				);
 				// #endregion
 
 				// #region EVENTS
@@ -163,6 +201,7 @@ export const ItemsList = connect(mapStateToProps)(
 						if (setup?.limit) {
 							dispatch({
 								data: {
+									className: "item",
 									filters: setup?.filters,
 									label,
 									limit: setup?.limit,
@@ -181,6 +220,7 @@ export const ItemsList = connect(mapStateToProps)(
 					(itemType: ItemType) => {
 						dispatch({
 							data: {
+								className: "item",
 								filters: (setup?.filters?.filter((filter) => filter.key !== "itemType") || []).concat({ key: "itemType", value: itemType }),
 								label,
 								limit: setup?.limit,
@@ -213,6 +253,7 @@ export const ItemsList = connect(mapStateToProps)(
 						}
 						dispatch({
 							data: {
+								className: "item",
 								filters: setup?.filters,
 								label,
 								limit: setup?.limit,
@@ -224,6 +265,56 @@ export const ItemsList = connect(mapStateToProps)(
 						});
 					},
 					[dispatch, label, setup?.filters, setup?.limit],
+				);
+
+				const updateManufacturersFilterList = useCallback(
+					(event: ChangeEvent<HTMLInputElement>) => {
+						const value = event?.currentTarget?.value;
+						setTimeout(
+							() => {
+								dispatch({
+									label,
+									manufacturerFilterSearchedtext: value,
+									type: ACTIONS.UPDATE_FEATURE,
+								});
+							},
+							300,
+						);
+					},
+					[dispatch, label],
+				);
+
+				const filterItemsPerManufacturer = useCallback(
+					(event: ChangeEvent<HTMLInputElement>) => {
+						if (event?.currentTarget) {
+							const { checked, value } = event.currentTarget;
+							const selectedCompanies = [...setup?.selectedCompanies || []];
+							checked
+								? selectedCompanies.push(value)
+								: selectedCompanies.splice(selectedCompanies.indexOf(value), 1);
+							dispatch({
+								label,
+								selectedCompanies,
+								type: ACTIONS.UPDATE_FEATURE,
+							});
+
+							dispatch({
+								data: {
+									className: "item",
+									filters: checked
+										? (setup?.filters || []).concat({ key: "manufacturer", value })
+										: (setup?.filters || []).filter((filter) => !(filter.key === "manufacturer" && filter.value === value)),
+									label,
+									limit: setup?.limit,
+									sort: setup?.sort,
+									start: setup?.start,
+									table: "items",
+								},
+								type: ACTIONS.FETCH_REQUESTED,
+							});
+						}
+					},
+					[dispatch, label, setup?.filters, setup?.limit, setup?.selectedCompanies, setup?.sort, setup?.start],
 				);
 				// #endregion
 
@@ -245,6 +336,13 @@ export const ItemsList = connect(mapStateToProps)(
 								label={t("Feature:Items:List:sorting")}
 								onChangeEventHandler={searchItemsBy}
 								options={sortOptions}
+							/>
+							<FilterCheckbox
+								checkboxOnChangeEventHandler={filterItemsPerManufacturer}
+								label={t("Feature:Items:List:brands")}
+								options={manufacturerFilterOptions}
+								placeholder={t("Feature:Items:List:searchBrand")}
+								textInputOnChangeEventHandler={updateManufacturersFilterList}
 							/>
 						</Grid>
 						<Grid item md={9}>

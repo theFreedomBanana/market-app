@@ -5,6 +5,7 @@
 				"add": "Add"
 			},
 			"List": {
+				"brands": "Brands",
 				"highToLow": "Price high to low",
 				"lowToHigh": "Price low to High",
 				"mug": "Mug",
@@ -13,6 +14,7 @@
 				"oldToNew": "Old to new",
 				"previous": "Prev",
 				"products": "Products",
+				"searchBrand": "Search brand",
 				"shirt": "Shirt",
 				"sorting": "Sorting"
 			}
