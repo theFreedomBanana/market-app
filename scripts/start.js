@@ -84,7 +84,7 @@ module.exports = (env) => {
 					test: /\.css$/i,
 					use: ["style-loader", "css-loader"],
 				},
-			]
+			],
 		},
 		/**
 		 * Tells how webpack will emit bundles.
@@ -107,6 +107,7 @@ module.exports = (env) => {
 					APPLICATION_ROOT_PATH: JSON.stringify(APPLICATION_ROOT_PATH),
 					NODE_ENV: JSON.stringify("development"),
 					PLATFORM_ENV: JSON.stringify("web"),
+					SERVER_URL: JSON.stringify("http://localhost:3000"),
 				},
 			}),
 			// /**

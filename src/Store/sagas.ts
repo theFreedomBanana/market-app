@@ -72,7 +72,7 @@ function* fetchRecords(actionParams: FetchRecordsParams) {
 		) : "";
 	const sort = actionParams.data.sort ? `&_sort=${actionParams.data.sort.key}&_order=${actionParams.data.sort.value}` : "";
 	try {
-		const asyncDbRequest = fetch(`http://localhost:3000/${table}?${start}${limit}${filter}${sort}`);
+		const asyncDbRequest = fetch(`${process.env.SERVER_URL}/${table}?${start}${limit}${filter}${sort}`);
 		const records: ValueOf<ClassEnumeration>[] = yield asyncDbRequest.then((response) => response.json());
 		const count: string = yield asyncDbRequest.then((response) => response.headers.get("X-Total-Count"));
 		yield put({ className, records, type: ACTIONS.FETCH_SUCCEEDED });
