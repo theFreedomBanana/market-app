@@ -126,7 +126,7 @@ module.exports = (env) => {
 					APPLICATION_ROOT_PATH: JSON.stringify(APPLICATION_ROOT_PATH),
 					NODE_ENV: JSON.stringify("production"),
 					PLATFORM_ENV: JSON.stringify("web"),
-					SERVER_URL: JSON.stringify("http://localhost:3000"),
+					SERVER_URL: JSON.stringify("https://market-server-prod.herokuapp.com"),
 				},
 			}),
 			/**
