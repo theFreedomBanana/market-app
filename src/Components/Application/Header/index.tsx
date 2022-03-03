@@ -1,4 +1,4 @@
-import { createStyles, Typography, withStyles, WithStyles } from "@material-ui/core";
+import { createStyles, Theme, Typography, withStyles, WithStyles } from "@material-ui/core";
 import React, { memo, useMemo } from "react";
 import { connect } from "react-redux";
 import { createSelector } from "reselect";
@@ -31,7 +31,7 @@ type HeaderProps = {
 // #endregion
 
 // #region CONSTANTS
-const styles = () => createStyles({
+const styles = ({ breakpoints }: Theme) => createStyles({
 	header__cartContainer: {
 		alignItems: "center",
 		backgroundColor: "#147594",
@@ -43,6 +43,7 @@ const styles = () => createStyles({
 		backgroundColor: "#1EA4CE",
 		padding: "0 6rem",
 		textAlign: "right",
+		[breakpoints.down("sm")]: { padding: 0 },
 	},
 	header__logo: {
 		left: "0%",
@@ -50,6 +51,7 @@ const styles = () => createStyles({
 		position: "absolute",
 		right: "0%",
 		transform: "translate(0, 50%)",
+		[breakpoints.down("xs")]: { left: "1rem", right: "auto" },
 	},
 	header__shoppingBagIcon: { marginRight: "1rem" },
 });
