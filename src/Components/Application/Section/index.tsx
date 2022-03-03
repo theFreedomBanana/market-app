@@ -6,10 +6,10 @@ import { ItemsList } from "../../Controllers/Features/Items/List";
 const styles = ({ breakpoints }: Theme) => createStyles({
 	section__container: {
 		backgroundColor: "#FAFAFA",
-		padding: "3rem 6rem",
-		[breakpoints.down("md")]: { padding: "3rem" },
-		[breakpoints.down("sm")]: { padding: "3rem 6rem" },
-		[breakpoints.down("xs")]: { padding: "3rem" },
+		padding: "3rem 6rem 9rem",
+		[breakpoints.down("md")]: { paddingLeft: "3rem", paddingRight: "3rem" },
+		[breakpoints.down("sm")]: { paddingLeft: "6rem", paddingRight: "6rem" },
+		[breakpoints.down("xs")]: { paddingLeft: "3rem", paddingRight: "3rem" },
 	},
 });
 // #endregion

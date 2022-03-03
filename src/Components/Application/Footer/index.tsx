@@ -5,7 +5,15 @@ import { useTranslation } from "react-i18next";
 // #region CONSTANTS
 const styles = () => createStyles({
 	footer__bullet: { padding: "0 1rem" },
-	footer__container: { color: "#1EA4CE", display: "flex", justifyContent: "center", paddingBottom: "3rem" },
+	footer__container: {
+		bottom: 0,
+		color: "#1EA4CE",
+		display: "flex",
+		justifyContent: "center",
+		paddingBottom: "3rem",
+		position: "absolute",
+		width: "100%",
+	},
 	footer__policy: { textTransform: "capitalize" },
 });
 
