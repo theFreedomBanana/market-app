@@ -1,11 +1,12 @@
-import { createStyles, Theme, Typography, withStyles, WithStyles } from "@material-ui/core";
-import React, { memo, useMemo } from "react";
+import { createStyles, Drawer, Theme, Typography, withStyles, WithStyles } from "@material-ui/core";
+import React, { memo, useCallback, useMemo, useState } from "react";
 import { connect } from "react-redux";
 import { createSelector } from "reselect";
 import { Item } from "../../../Classes/Item";
 import { Store } from "../../../Store";
 import Logo from "../../../../res/images/logo.png";
 import ShoppingBagIcon from "../../../../res/icons/shoppingBag.svg";
+import { Cart } from "../../Controllers/Features/Cart";
 
 // #region TYPES
 interface HeaderSetup {
@@ -36,6 +37,7 @@ const styles = ({ breakpoints }: Theme) => createStyles({
 		alignItems: "center",
 		backgroundColor: "#147594",
 		color: "#FFFFFF",
+		cursor: "pointer",
 		display: "inline-flex",
 		padding: "2rem",
 	},
@@ -45,6 +47,7 @@ const styles = ({ breakpoints }: Theme) => createStyles({
 		textAlign: "right",
 		[breakpoints.down("sm")]: { padding: 0 },
 	},
+	header__drawer: { backgroundColor: "#FAFAFA" },
 	header__logo: {
 		left: "0%",
 		margin: "auto",
@@ -102,6 +105,7 @@ export const ApplicationHeader = connect(mapStateToProps)(
 	withStyles(styles)(
 		memo(
 			({ classes, itemPerSlug, setup }: HeaderProps) => {
+				const [isDrawerOpen, setDrawer] = useState<boolean>(false);
 
 				// #region MODEL
 				const totalPrice = useMemo(
@@ -115,15 +119,34 @@ export const ApplicationHeader = connect(mapStateToProps)(
 				);
 				// #endregion
 
+				// #region EVENTS
+				const toggleDrawer = useCallback(
+					(open: boolean) => () => {
+						setDrawer(open);
+					},
+					[setDrawer],
+				);
+				// #endregion
+
 				// #region RENDERING
 				return (
-					<div className={classes.header__container}>
-						<img alt="logo" className={classes.header__logo} src={Logo} />
-						<div className={classes.header__cartContainer}>
-							<ShoppingBagIcon className={classes.header__shoppingBagIcon} />
-							<Typography>&#8378; {totalPrice}</Typography>
+					<>
+						<div className={classes.header__container}>
+							<img alt="logo" className={classes.header__logo} src={Logo} />
+							<div className={classes.header__cartContainer} onClick={toggleDrawer(true)}>
+								<ShoppingBagIcon className={classes.header__shoppingBagIcon} />
+								<Typography>&#8378; {totalPrice}</Typography>
+							</div>
 						</div>
-					</div>
+						<Drawer
+							anchor="right"
+							classes={{ paperAnchorRight: classes.header__drawer }}
+							onClose={toggleDrawer(false)}
+							open={isDrawerOpen}
+						>
+							<Cart label="cart" />
+						</Drawer>
+					</>
 				);
 				// #endregion
 			},
