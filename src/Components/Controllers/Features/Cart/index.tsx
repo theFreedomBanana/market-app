@@ -38,14 +38,13 @@ const styles = () => createStyles({
 	cart__actionOnItem: { color: "#1EA4CE", cursor: "pointer", display: "inline", fontSize: "2rem", verticalAlign: "middle" },
 	cart__addItem: { marginLeft: "0.75rem" },
 	cart__container: {
-		border: "8px solid #1EA4CE",
-		borderRadius: "2px",
 		display: "flex",
 		flexDirection: "column",
-		maxHeight: "700px",
+		maxHeight: "100vh",
 		padding: "1rem 0 1rem 1rem",
+		width: "100%",
 	},
-	cart__itemActionsContainer: { textAlign: "center" },
+	cart__itemActionsContainer: { textAlign: "right" },
 	cart__itemContainer: { borderBottom: "1px solid #F4F4F4", padding: "1.5rem 0" },
 	cart__itemCount: { color: "#FFFFFF", position: "absolute", transform: "translate(-50%, -50%)" },
 	cart__itemCountContainer: {
@@ -175,13 +174,13 @@ export const Cart = connect(mapStateToProps)(
 						<div className={classes.cart__itemsListContainer}>
 							{Object.entries(setup?.articlePerItemSlug || {}).map(([itemSlug, { count }]) => (
 								<Grid className={classes.cart__itemContainer} container key={itemSlug}>
-									<Grid item xs={8}>
+									<Grid item lg={7} md={12} xl={8} xs={6}>
 										<Typography className={classes.cart__itemName}>{itemPerSlug?.[itemSlug].name}</Typography>
 										<Typography className={classes.cart__itemPrice}>
 											&#8378; {itemPerSlug?.[itemSlug].price}
 										</Typography>
 									</Grid>
-									<Grid className={classes.cart__itemActionsContainer} item xs={4}>
+									<Grid className={classes.cart__itemActionsContainer} item lg={5} md={12} xl={4} xs={6}>
 										<Typography
 											className={clsx(classes.cart__actionOnItem, classes.cart__removeItem)}
 											onClick={() => removeItemFromCart(itemSlug)}

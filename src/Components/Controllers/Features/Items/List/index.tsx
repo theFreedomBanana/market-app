@@ -112,6 +112,7 @@ const mapStateToProps = (store: Store, { label }: { label: string; }) => ({
 });
 
 const styles = ({ breakpoints }: Theme) => createStyles({
+	list__cartContainer: { border: "8px solid #1EA4CE", borderRadius: "2px", display: "flex", maxHeight: "500px" },
 	list__container: { marginBottom: "2rem", padding: "1rem" },
 	list__filterAccordionDetails: { padding: 0 },
 	list__filterAccordionIcon: { color: "#697488" },
@@ -162,6 +163,7 @@ export const ItemsList = connect(mapStateToProps)(
 			({ classes, companies, dispatch, items, label, setup }: ItemsListProps) => {
 				const { t } = useTranslation();
 				const smBreakpoint = useMediaQuery(useTheme().breakpoints.down("sm"));
+				const mdBreakpoint = useMediaQuery(useTheme().breakpoints.up("md"));
 
 				useEffect(
 					() => {
@@ -405,7 +407,7 @@ export const ItemsList = connect(mapStateToProps)(
 								)
 							}
 						</Grid>
-						<Grid item md={6}>
+						<Grid item md={6} xs={12}>
 							<Typography className={classes.list__title} variant="h4">{t("Feature:Items:List:products")}</Typography>
 							<div className={classes.list__filterContainer}>
 								<div
@@ -457,9 +459,13 @@ export const ItemsList = connect(mapStateToProps)(
 								)
 							}
 						</Grid>
-						<Grid item md={3}>
-							<Cart label="cart" />
-						</Grid>
+						{mdBreakpoint && (
+							<Grid item md={3}>
+								<div className={classes.list__cartContainer}>
+									<Cart label="cart" />
+								</div>
+							</Grid>
+						)}
 					</Grid>
 				);
 				// #endregion
