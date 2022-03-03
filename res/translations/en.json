@@ -1,4 +1,10 @@
 {
+	"Application": {
+		"Footer": {
+			"name": "Market",
+			"policy": "Private policy"
+		}
+	},
 	"Feature": {
 		"Items": {
 			"Card": {

@@ -10,6 +10,7 @@ import logger from "redux-logger";
 import createSagaMiddleware from "redux-saga";
 
 import enTranslations from "../res/translations/en.json";
+import { ApplicationFooter } from "./Components/Application/Footer";
 import { ApplicationHeader } from "./Components/Application/Header";
 import { ApplicationSection } from "./Components/Application/Section";
 import { application as applicationReducer } from "./Store/Application/reducers";
@@ -44,6 +45,7 @@ const App = () => (
 		<ThemeProvider theme={theme}>
 			<ApplicationHeader label="header" />
 			<ApplicationSection />
+			<ApplicationFooter />
 		</ThemeProvider>
 	</>
 );
