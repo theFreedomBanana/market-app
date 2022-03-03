@@ -1,10 +1,14 @@
-import { createStyles, withStyles, WithStyles } from "@material-ui/core";
+import { createStyles, Theme, withStyles, WithStyles } from "@material-ui/core";
 import React, { memo } from "react";
 import { ItemsList } from "../../Controllers/Features/Items/List";
 
 // #region CONSTANTS
-const styles = () => createStyles({
-	section__container: { backgroundColor: "#FAFAFA", padding: "3rem 6rem" },
+const styles = ({ breakpoints }: Theme) => createStyles({
+	section__container: {
+		backgroundColor: "#FAFAFA",
+		padding: "3rem 6rem",
+		[breakpoints.down("md")]: { padding: "3rem" },
+	},
 });
 // #endregion
 
