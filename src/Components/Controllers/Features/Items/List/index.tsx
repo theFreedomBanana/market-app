@@ -1,4 +1,5 @@
-import { createStyles, Grid, Paper, Typography, withStyles, WithStyles } from "@material-ui/core";
+import { Accordion, AccordionDetails, AccordionSummary, createStyles, Grid, Paper, Theme, Typography, useMediaQuery, withStyles, WithStyles } from "@material-ui/core";
+import { useTheme } from "@material-ui/core/styles";
 import { CircularProgress } from "@mui/material";
 import clsx from "clsx";
 import React, { ChangeEvent, memo, useCallback, useEffect, useMemo } from "react";
@@ -6,6 +7,7 @@ import { useTranslation } from "react-i18next";
 import { connect } from "react-redux";
 import { Dispatch } from "redux";
 import { createSelector } from "reselect";
+import ArrowDownIcon from "../../../../../../res/icons/arrowDown.svg";
 import { Company } from "../../../../../Classes/Company";
 import { Item, ItemType } from "../../../../../Classes/Item";
 import { Store } from "../../../../../Store";
@@ -109,8 +111,11 @@ const mapStateToProps = (store: Store, { label }: { label: string; }) => ({
 	setup: selectSetup(store)(label),
 });
 
-const styles = () => createStyles({
+const styles = ({ breakpoints }: Theme) => createStyles({
 	list__container: { marginBottom: "2rem", padding: "1rem" },
+	list__filterAccordionDetails: { padding: 0 },
+	list__filterAccordionIcon: { color: "#697488" },
+	list__filterAccordionSummary: { color: "#697488", fontWeight: 600 },
 	list__filterContainer: { marginBottom: "1rem" },
 	list__filterItem: {
 		"&:hover": { boxShadow: "0px 4px 4px 0px rgba(0, 0, 0, .25)" },
@@ -134,7 +139,9 @@ const styles = () => createStyles({
 		top: 0,
 	},
 	list__loaderSvg: { color: "#1EA4CE" },
-	list__sortRadio: { marginBottom: "2rem" },
+	list__sortRadio: {
+		[breakpoints.up("md")]: { marginBottom: "2rem" },
+	},
 	list__title: {
 		backgroundColor: "#FAFAFA",
 		color: "#6F6F6F",
@@ -154,6 +161,7 @@ export const ItemsList = connect(mapStateToProps)(
 		memo(
 			({ classes, companies, dispatch, items, label, setup }: ItemsListProps) => {
 				const { t } = useTranslation();
+				const smBreakpoint = useMediaQuery(useTheme().breakpoints.down("sm"));
 
 				useEffect(
 					() => {
@@ -332,25 +340,70 @@ export const ItemsList = connect(mapStateToProps)(
 				// #region RENDERING
 				return (
 					<Grid container spacing={2}>
-						<Grid item md={3}>
-							<SortRadio
-								custom={{
-									formControlProps: {
-										classes: { root: classes.list__sortRadio },
-									},
-								}}
-								defaultOption={sortOptions[0]}
-								label={t("Feature:Items:List:sorting")}
-								onChangeEventHandler={searchItemsBy}
-								options={sortOptions}
-							/>
-							<FilterCheckbox
-								checkboxOnChangeEventHandler={filterItemsPerManufacturer}
-								label={t("Feature:Items:List:brands")}
-								options={manufacturerFilterOptions}
-								placeholder={t("Feature:Items:List:searchBrand")}
-								textInputOnChangeEventHandler={updateManufacturersFilterList}
-							/>
+						<Grid item md={3} xs={12}>
+							{smBreakpoint
+								? (
+									<>
+										<Accordion>
+											<AccordionSummary
+												className={classes.list__filterAccordionSummary}
+												expandIcon={<ArrowDownIcon className={classes.list__filterAccordionIcon} />}
+											>
+												<Typography>{t("Feature:Items:List:sorting")}</Typography>
+											</AccordionSummary>
+											<AccordionDetails classes={{ root: classes.list__filterAccordionDetails }}>
+												<SortRadio
+													custom={{
+														formControlProps: {
+															classes: { root: classes.list__sortRadio },
+														},
+													}}
+													defaultOption={sortOptions[0]}
+													onChangeEventHandler={searchItemsBy}
+													options={sortOptions}
+												/>
+											</AccordionDetails>
+										</Accordion>
+										<Accordion>
+											<AccordionSummary
+												className={classes.list__filterAccordionSummary}
+												expandIcon={<ArrowDownIcon className={classes.list__filterAccordionIcon} />}
+											>
+												<Typography>{t("Feature:Items:List:brands")}</Typography>
+											</AccordionSummary>
+											<AccordionDetails classes={{ root: classes.list__filterAccordionDetails }}>
+												<FilterCheckbox
+													checkboxOnChangeEventHandler={filterItemsPerManufacturer}
+													options={manufacturerFilterOptions}
+													placeholder={t("Feature:Items:List:searchBrand")}
+													textInputOnChangeEventHandler={updateManufacturersFilterList}
+												/>
+											</AccordionDetails>
+										</Accordion>
+									</>
+								) : (
+									<>
+										<SortRadio
+											custom={{
+												formControlProps: {
+													classes: { root: classes.list__sortRadio },
+												},
+											}}
+											defaultOption={sortOptions[0]}
+											label={t("Feature:Items:List:sorting")}
+											onChangeEventHandler={searchItemsBy}
+											options={sortOptions}
+										/>
+										<FilterCheckbox
+											checkboxOnChangeEventHandler={filterItemsPerManufacturer}
+											label={t("Feature:Items:List:brands")}
+											options={manufacturerFilterOptions}
+											placeholder={t("Feature:Items:List:searchBrand")}
+											textInputOnChangeEventHandler={updateManufacturersFilterList}
+										/>
+									</>
+								)
+							}
 						</Grid>
 						<Grid item md={6}>
 							<Typography className={classes.list__title} variant="h4">{t("Feature:Items:List:products")}</Typography>
