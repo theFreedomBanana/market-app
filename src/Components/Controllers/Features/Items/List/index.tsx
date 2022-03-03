@@ -442,7 +442,7 @@ export const ItemsList = connect(mapStateToProps)(
 										<Paper className={classes.list__container} elevation={2}>
 											<Grid container spacing={2}>
 												{items.map((item) => (
-													<Grid item key={item.slug} md={3}>
+													<Grid item key={item.slug} xs={12} lg={3}>
 														<ItemCard item={item} label="cart" />
 													</Grid>
 												))}

@@ -1,4 +1,5 @@
-import { createStyles, Typography, withStyles, WithStyles } from "@material-ui/core";
+import { createStyles, Theme, Typography, useMediaQuery, withStyles, WithStyles } from "@material-ui/core";
+import { useTheme } from "@material-ui/core/styles";
 import React, { memo, useCallback } from "react";
 import { connect } from "react-redux";
 import { Dispatch } from "redux";
@@ -20,7 +21,7 @@ type ItemCardProps = {
 // #endregion
 
 // #region CONSTANTS
-const styles = () => createStyles({
+const styles = ({ breakpoints }: Theme) => createStyles({
 	card__button: {
 		"&:hover": {
 			boxShadow: "0px 4px 4px 0px rgba(0, 0, 0, .25)",
@@ -35,29 +36,50 @@ const styles = () => createStyles({
 		lineHeight: "1.3rem",
 		padding: "0.3rem 0",
 		width: "100%",
+		[breakpoints.down("md")]: { flexGrow: 2, fontSize: "1.1rem" },
 	},
-	card__container: { display: "flex", flexDirection: "column", height: "100%", justifyContent: "space-between" },
-	card__itemImage: { maxWidth: "100%" },
-	card__itemImageContainer: {
+	card__container: {
+		display: "flex",
+		flexDirection: "row",
+		height: "100%",
+		justifyContent: "space-between",
+		[breakpoints.up("lg")]: { flexDirection: "column" },
+	},
+	card__imageContainer: {
 		backgroundColor: "#FEFEFE",
 		border: "1.18px solid #F3F0FE",
 		borderRadius: "12px",
-		display: "flex",
-		marginBottom: "0.7rem",
 		padding: "1rem",
+		[breakpoints.up("lg")]: { marginBottom: "0.7rem" },
+		[breakpoints.down("xs")]: { display: "none" },
 	},
+	card__infoContainer: {
+		display: "flex",
+		flexDirection: "column",
+		flexGrow: 1,
+		[breakpoints.up("sm")]: {
+			[breakpoints.down("md")]: {
+				borderLeft: "1px solid #F3F0FE",
+				marginLeft: "1rem",
+				padding: "1rem 0 1rem 1rem",
+			},
+		},
+	},
+	card__itemImage: { maxWidth: "100%" },
 	card__itemName: {
 		color: "#191919",
 		flexGrow: 2,
 		fontWeight: 600,
 		marginBottom: "0.7rem",
+		[breakpoints.down("md")]: { fontSize: "1.1rem" },
 	},
-	card__itemPrice: {
+	card__itemPrice: { fontWeight: 700 },
+	card__itemPriceContainer: {
 		color: "#1EA4CE",
 		display: "inline",
 		marginBottom: "0.7rem",
+		[breakpoints.down("md")]: { fontSize: "1rem" },
 	},
-	card__itemPriceText: { fontWeight: 700 },
 });
 
 const selectItemsInCart = createSelector(
@@ -88,6 +110,7 @@ export const ItemCard = connect(mapStateToProps)(
 		memo(
 			({ classes, dispatch, item, articleInCartPerItemSlug }: ItemCardProps) => {
 				const { t } = useTranslation();
+				const breakpointLgAndOver = useMediaQuery(useTheme().breakpoints.up("lg"));
 
 				// #region EVENTS
 				const addItemToCart = useCallback(
@@ -107,24 +130,33 @@ export const ItemCard = connect(mapStateToProps)(
 				// #region RENDERING
 				return (
 					<div className={classes.card__container}>
-						<div className={classes.card__itemImageContainer}>
-							<img alt="Nicholas Cage" className={classes.card__itemImage} src="https://www.placecage.com/640/640" />
+						<div className={classes.card__imageContainer}>
+							<img
+								alt="Nicholas Cage"
+								className={classes.card__itemImage}
+								src={breakpointLgAndOver
+									? "https://www.placecage.com/320/320"
+									: "https://www.placecage.com/120/120"
+								}
+							/>
 						</div>
-						<div>
-							<Typography className={classes.card__itemPrice}>&#8378; </Typography>
-							<Typography
-								className={`${classes.card__itemPrice} ${classes.card__itemPriceText}`}
+						<div className={classes.card__infoContainer}>
+							<div className={classes.card__itemPriceContainer}>
+								<span>&#8378; </span>
+								<span
+									className={classes.card__itemPrice}
+								>
+									{item.price}
+								</span>
+							</div>
+							<Typography className={classes.card__itemName}>{item.name}</Typography>
+							<button
+								className={classes.card__button}
+								onClick={() => addItemToCart(item)}
 							>
-								{item.price}
-							</Typography>
+								{t("Feature:Items:Card:add")}
+							</button>
 						</div>
-						<Typography className={classes.card__itemName}>{item.name}</Typography>
-						<button
-							className={classes.card__button}
-							onClick={() => addItemToCart(item)}
-						>
-							{t("Feature:Items:Card:add")}
-						</button>
 					</div>
 				);
 				// #endregion

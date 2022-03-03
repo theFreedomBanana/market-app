@@ -8,6 +8,8 @@ const styles = ({ breakpoints }: Theme) => createStyles({
 		backgroundColor: "#FAFAFA",
 		padding: "3rem 6rem",
 		[breakpoints.down("md")]: { padding: "3rem" },
+		[breakpoints.down("sm")]: { padding: "3rem 6rem" },
+		[breakpoints.down("xs")]: { padding: "3rem" },
 	},
 });
 // #endregion
