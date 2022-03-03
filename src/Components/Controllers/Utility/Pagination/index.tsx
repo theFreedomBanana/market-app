@@ -1,4 +1,4 @@
-import { createStyles, Grid, Typography, withStyles, WithStyles } from "@material-ui/core";
+import { createStyles, Grid, Theme, Typography, withStyles, WithStyles } from "@material-ui/core";
 import clsx from "clsx";
 import React, { memo, useCallback } from "react";
 import { useTranslation } from "react-i18next";
@@ -23,17 +23,21 @@ interface PaginationProps {
 // #endregion
 
 // #region CONSTANTS
-const styles = () => createStyles({
+const styles = ({ breakpoints }: Theme) => createStyles({
+	pagination__arrowIconContainer: { display: "flex" },
 	pagination__arrowNavContainer: {
 		"&:hover": { color: "#1EA4CE", cursor: "pointer" },
 		alignItems: "center",
 		color: "#697488",
 		display: "flex",
 	},
-	pagination__container: { alignItems: "center", padding: "0 2rem" },
+	pagination__container: { alignItems: "center", justifyContent: "space-between", padding: "0 2rem" },
 	pagination__nextNavContainer: { justifyContent: "right" },
 	pagination__nextNavText: { marginRight: "1rem" },
-	pagination__numberNavContainer: { display: "flex" },
+	pagination__numberNavContainer: {
+		display: "flex",
+		[breakpoints.down("xs")]: { display: "none" },
+	},
 	pagination__numberNavItem: {
 		color: "#798395",
 		display: "inline",
@@ -120,7 +124,7 @@ export const Pagination = withStyles(styles)(
 						className={clsx(classes.pagination__arrowNavContainer, classes.pagination__previousNavContainer)}
 						onClick={() => navigateToPage(currentPage - 1)}
 					>
-						<ArrowLeftIcon />
+						<div className={classes.pagination__arrowIconContainer}><ArrowLeftIcon /></div>
 						<Typography className={classes.pagination__previousNavText}>{t("Feature:Items:List:previous")}</Typography>
 					</Grid>
 					<Grid className={classes.pagination__numberNavContainer} item xs={8}>
@@ -150,7 +154,7 @@ export const Pagination = withStyles(styles)(
 						xs={2}
 					>
 						<Typography className={classes.pagination__nextNavText}>{t("Feature:Items:List:next")}</Typography>
-						<ArrowRightIcon />
+						<div className={classes.pagination__arrowIconContainer}><ArrowRightIcon /></div>
 					</Grid>
 				</Grid>
 			);
