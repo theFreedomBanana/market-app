@@ -1,4 +1,4 @@
-import { put, takeEvery } from "redux-saga/effects";
+import { all, put, takeEvery } from "redux-saga/effects";
 import { ClassEnumeration, ValueOf } from "../Classes";
 import { ACTIONS } from "./actions";
 
@@ -93,6 +93,34 @@ function* fetchRecords(actionParams: FetchRecordsParams) {
 	}
 }
 
-export function* sagaForFetchRequested() {
+function* fetchCounts(actionParams: any) {
+	const { filter, label } = actionParams.data;
+	try {
+		const asyncDbRequest = fetch(`${process.env.SERVER_URL}/counts/${filter}`);
+		const count: { [index: string]: number } = yield asyncDbRequest.then((response) => response.json());
+		if (label) {
+			yield put({
+				label,
+				[`${filter}Count`]: count,
+				type: ACTIONS.UPDATE_FEATURE,
+			});
+		}
+	} catch ({ message }) {
+		yield put({ message, type: ACTIONS.THROW_ERROR });
+	}
+}
+
+function* sagaForFetchRequested() {
 	yield takeEvery(ACTIONS.FETCH_REQUESTED, fetchRecords);
+}
+
+function* sagaForCounts() {
+	yield takeEvery(ACTIONS.FETCH_COUNTS_REQUEST, fetchCounts);
+}
+
+export function* sagasForServerRequests() {
+	yield all([
+		sagaForFetchRequested(),
+		sagaForCounts(),
+	]);
 }

@@ -189,6 +189,7 @@ export const ItemsList = connect(mapStateToProps)(
 							type: ACTIONS.FETCH_REQUESTED,
 						});
 						dispatch({ data: { className: "company", table: "companies" }, type: ACTIONS.FETCH_REQUESTED });
+						dispatch({ data: { filter: "company", label }, type: ACTIONS.FETCH_COUNTS_REQUEST });
 					},
 					[dispatch, label],
 				);

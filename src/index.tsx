@@ -16,7 +16,7 @@ import { ApplicationSection } from "./Components/Application/Section";
 import { application as applicationReducer } from "./Store/Application/reducers";
 import { controllers as controllersReducer } from "./Store/Controllers/reducers";
 import { information as informationReducer } from "./Store/Information/reducers";
-import { sagaForFetchRequested } from "./Store/sagas";
+import { sagasForServerRequests } from "./Store/sagas";
 import { theme } from "./Theme";
 
 const EMPTY_STATE = { item: {} };
@@ -37,7 +37,7 @@ const store = createStore(
 	applyMiddleware(...middlewares),
 );
 
-sagaMiddleware.run(sagaForFetchRequested);
+sagaMiddleware.run(sagasForServerRequests);
 
 const App = () => (
 	<>
