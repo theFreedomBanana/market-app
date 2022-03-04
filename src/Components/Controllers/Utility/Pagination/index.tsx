@@ -25,11 +25,10 @@ interface PaginationProps {
 // #region CONSTANTS
 const styles = ({ breakpoints }: Theme) => createStyles({
 	pagination__arrowIconContainer: { display: "flex" },
-	pagination__arrowNavContainer: {
+	pagination__arrowNavContainer: { alignItems: "center", color: "#697488", display: "flex" },
+	"pagination__arrowNavContainer--disabled": { color: "#A8A8A8" },
+	"pagination__arrowNavContainer--enabled": {
 		"&:hover": { color: "#1EA4CE", cursor: "pointer" },
-		alignItems: "center",
-		color: "#697488",
-		display: "flex",
 	},
 	pagination__container: { alignItems: "center", justifyContent: "space-between", padding: "0 2rem" },
 	pagination__nextNavContainer: { justifyContent: "right" },
@@ -121,9 +120,18 @@ export const Pagination = withStyles(styles)(
 				<Grid className={classes.pagination__container} container>
 					<Grid
 						item xs={2}
-						className={clsx(classes.pagination__arrowNavContainer, classes.pagination__previousNavContainer)}
-						onClick={() => navigateToPage(currentPage - 1)}
-					>
+						className={clsx(
+							classes.pagination__arrowNavContainer,
+							classes.pagination__previousNavContainer,
+							currentPage <= 1
+								? classes["pagination__arrowNavContainer--disabled"]
+								: classes["pagination__arrowNavContainer--enabled"],
+						)}
+						onClick={() => {
+							if (currentPage > 1) {
+								navigateToPage(currentPage - 1);
+							}
+						}}>
 						<div className={classes.pagination__arrowIconContainer}><ArrowLeftIcon /></div>
 						<Typography className={classes.pagination__previousNavText}>{t("Feature:Items:List:previous")}</Typography>
 					</Grid>
@@ -148,9 +156,19 @@ export const Pagination = withStyles(styles)(
 						))}
 					</Grid>
 					<Grid
-						className={clsx(classes.pagination__arrowNavContainer, classes.pagination__nextNavContainer)}
+						className={clsx(
+							classes.pagination__arrowNavContainer,
+							classes.pagination__nextNavContainer,
+							currentPage >= pageCount
+								? classes["pagination__arrowNavContainer--disabled"]
+								: classes["pagination__arrowNavContainer--enabled"],
+						)}
 						item
-						onClick={() => navigateToPage(currentPage + 1)}
+						onClick={() => {
+							if (currentPage < pageCount) {
+								navigateToPage(currentPage + 1);
+							}
+						}}
 						xs={2}
 					>
 						<Typography className={classes.pagination__nextNavText}>{t("Feature:Items:List:next")}</Typography>
