@@ -14,6 +14,6 @@ export interface Item {
 }
 
 export enum ItemType {
-	MUG = "Mug",
-	SHIRT = "Shirt",
+	MUG = "mug",
+	SHIRT = "shirt",
 }

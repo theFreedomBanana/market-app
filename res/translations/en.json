@@ -25,5 +25,13 @@
 				"sorting": "Sorting"
 			}
 		}
+	},
+	"Information": {
+		"Item": {
+			"type": {
+				"mug": "Mug",
+				"shirt": "Shirt"
+			}
+		}
 	}
 }

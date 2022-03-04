@@ -1,7 +1,6 @@
 import { Accordion, AccordionDetails, AccordionSummary, createStyles, Grid, Paper, Theme, Typography, useMediaQuery, withStyles, WithStyles } from "@material-ui/core";
 import { useTheme } from "@material-ui/core/styles";
 import { CircularProgress } from "@mui/material";
-import clsx from "clsx";
 import React, { ChangeEvent, memo, useCallback, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { connect } from "react-redux";
@@ -13,6 +12,7 @@ import { Item, ItemType } from "../../../../../Classes/Item";
 import { Store } from "../../../../../Store";
 import { ACTIONS } from "../../../../../Store/actions";
 import { Pagination } from "../../../Utility/Pagination";
+import { FilterButton, FilterButtonProps } from "../../../Utility/FilterButton";
 import { FilterCheckbox } from "../../../Utility/FilterCheckbox";
 import { SortRadio } from "../../../Utility/SortRadio";
 import { Cart } from "../../Cart";
@@ -179,7 +179,6 @@ export const ItemsList = connect(mapStateToProps)(
 							},
 							type: ACTIONS.FETCH_REQUESTED,
 						});
-
 						dispatch({ data: { className: "company", table: "companies" }, type: ACTIONS.FETCH_REQUESTED });
 					},
 					[dispatch, label],
@@ -214,6 +213,27 @@ export const ItemsList = connect(mapStateToProps)(
 						.filter(({ textPrimary }) => textPrimary.toLowerCase().includes(setup?.manufacturerFilterSearchedtext?.toLowerCase() || "")),
 					[companies, setup?.selectedCompanies, setup?.manufacturerFilterSearchedtext],
 				);
+
+				const typeFilterSelectedValue = useMemo(
+					() => {
+						if (setup?.filters) {
+
+							return setup.filters.find(({ key }) => key === "itemType")?.value;
+						} else {
+
+							return undefined;
+						}
+					},
+					[setup?.filters],
+				);
+
+				const typeFilterOptions = useMemo(
+					() => Object.values(ItemType).map((type) => ({
+						text: t(`Information:Item:type:${type}`),
+						value: type,
+					})),
+					[t],
+				);
 				// #endregion
 
 				// #region EVENTS
@@ -237,20 +257,23 @@ export const ItemsList = connect(mapStateToProps)(
 					[dispatch, label, setup?.filters, setup?.limit, setup?.sort],
 				);
 
-				const searchItemsWithItemType = useCallback(
-					(itemType: ItemType) => {
-						dispatch({
-							data: {
-								className: "item",
-								filters: (setup?.filters?.filter((filter) => filter.key !== "itemType") || []).concat({ key: "itemType", value: itemType }),
-								label,
-								limit: setup?.limit,
-								sort: setup?.sort,
-								start: 0,
-								table: "items",
-							},
-							type: ACTIONS.FETCH_REQUESTED,
-						});
+				const filterItemsByType: FilterButtonProps["onSelectCallback"] = useCallback(
+					(event) =>{
+						if (event.currentTarget.dataset?.value) {
+							dispatch({
+								data: {
+									className: "item",
+									filters: (setup?.filters?.filter((filter) => filter.key !== "itemType") || [])
+										.concat({ key: "itemType", value: event.currentTarget.dataset.value }),
+									label,
+									limit: setup?.limit,
+									sort: setup?.sort,
+									start: 0,
+									table: "items",
+								},
+								type: ACTIONS.FETCH_REQUESTED,
+							});
+						}
 					},
 					[dispatch, label, setup?.filters, setup?.limit, setup?.sort],
 				);
@@ -409,30 +432,15 @@ export const ItemsList = connect(mapStateToProps)(
 						</Grid>
 						<Grid item md={6} xs={12}>
 							<Typography className={classes.list__title} variant="h4">{t("Feature:Items:List:products")}</Typography>
-							<div className={classes.list__filterContainer}>
-								<div
-									className={clsx(
-										classes.list__filterItem,
-										setup?.filters?.find(({ key, value }) => key === "itemType" && value === ItemType.MUG)
-											? classes["list__filterItem--enabled"]
-											: classes["list__filterItem--disabled"],
-									)}
-									onClick={() => searchItemsWithItemType(ItemType.MUG)}
-								>
-									{t("Feature:Items:List:mug")}
+							{typeFilterOptions && (
+								<div className={classes.list__filterContainer}>
+									<FilterButton
+										onSelectCallback={filterItemsByType}
+										options={typeFilterOptions}
+										selectedValue={typeFilterSelectedValue}
+									/>
 								</div>
-								<div
-									className={clsx(
-										classes.list__filterItem,
-										setup?.filters?.find(({ key, value }) => key === "itemType" && value === ItemType.SHIRT)
-											? classes["list__filterItem--enabled"]
-											: classes["list__filterItem--disabled"],
-									)}
-									onClick={() => searchItemsWithItemType(ItemType.SHIRT)}
-								>
-									{t("Feature:Items:List:shirt")}
-								</div>
-							</div>
+							)}
 							{!(items)
 								? (
 									<CircularProgress classes={{
