@@ -166,6 +166,11 @@ export const ItemsList = connect(mapStateToProps)(
 				const mdBreakpoint = useMediaQuery(useTheme().breakpoints.up("md"));
 
 				useEffect(
+					() => () => { dispatch({ label, type: ACTIONS.DELETE_FEATURE }); },
+					[dispatch, label],
+				);
+
+				useEffect(
 					() => {
 						dispatch({
 							data: {
