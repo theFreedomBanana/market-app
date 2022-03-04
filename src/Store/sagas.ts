@@ -75,7 +75,7 @@ function* fetchRecords(actionParams: FetchRecordsParams) {
 		const asyncDbRequest = fetch(`${process.env.SERVER_URL}/${table}?${start}${limit}${filter}${sort}`);
 		const records: ValueOf<ClassEnumeration>[] = yield asyncDbRequest.then((response) => response.json());
 		const count: string = yield asyncDbRequest.then((response) => response.headers.get("X-Total-Count"));
-		yield put({ className, records, type: ACTIONS.FETCH_SUCCEEDED });
+		yield put({ className, records, type: ACTIONS.FETCH_RECORDS_SUCCESS });
 		if (label) {
 			yield put({
 				count: parseInt(count, 10),
@@ -111,7 +111,7 @@ function* fetchCounts(actionParams: any) {
 }
 
 function* sagaForFetchRequested() {
-	yield takeEvery(ACTIONS.FETCH_REQUESTED, fetchRecords);
+	yield takeEvery(ACTIONS.FETCH_RECORDS_REQUEST, fetchRecords);
 }
 
 function* sagaForCounts() {

@@ -11,7 +11,7 @@ export const information = (
 	state = EMPTY_STATE,
 	payload: { className: keyof InformationState; type: INFORMATION_ACTIONS, records: ValueOf<ClassEnumeration>[] },
 ) => {
-	if (payload.type === INFORMATION_ACTIONS.FETCH_SUCCEEDED) {
+	if (payload.type === INFORMATION_ACTIONS.FETCH_RECORDS_SUCCESS) {
 		const nextState = {
 			...state,
 			[payload.className]: {

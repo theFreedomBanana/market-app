@@ -186,9 +186,9 @@ export const ItemsList = connect(mapStateToProps)(
 								start: 0,
 								table: "items",
 							},
-							type: ACTIONS.FETCH_REQUESTED,
+							type: ACTIONS.FETCH_RECORDS_REQUEST,
 						});
-						dispatch({ data: { className: "company", table: "companies" }, type: ACTIONS.FETCH_REQUESTED });
+						dispatch({ data: { className: "company", table: "companies" }, type: ACTIONS.FETCH_RECORDS_REQUEST });
 						dispatch({ data: { filter: "company", label }, type: ACTIONS.FETCH_COUNTS_REQUEST });
 					},
 					[dispatch, label],
@@ -261,7 +261,7 @@ export const ItemsList = connect(mapStateToProps)(
 									start: (pageNumber - 1) * setup?.limit,
 									table: "items",
 								},
-								type: ACTIONS.FETCH_REQUESTED,
+								type: ACTIONS.FETCH_RECORDS_REQUEST,
 							});
 						}
 					},
@@ -282,7 +282,7 @@ export const ItemsList = connect(mapStateToProps)(
 									start: 0,
 									table: "items",
 								},
-								type: ACTIONS.FETCH_REQUESTED,
+								type: ACTIONS.FETCH_RECORDS_REQUEST,
 							});
 						}
 					},
@@ -316,7 +316,7 @@ export const ItemsList = connect(mapStateToProps)(
 								start: 0,
 								table: "items",
 							},
-							type: ACTIONS.FETCH_REQUESTED,
+							type: ACTIONS.FETCH_RECORDS_REQUEST,
 						});
 					},
 					[dispatch, label, setup?.filters, setup?.limit],
@@ -365,7 +365,7 @@ export const ItemsList = connect(mapStateToProps)(
 									start: setup?.start,
 									table: "items",
 								},
-								type: ACTIONS.FETCH_REQUESTED,
+								type: ACTIONS.FETCH_RECORDS_REQUEST,
 							});
 						}
 					},
