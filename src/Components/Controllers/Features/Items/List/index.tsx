@@ -21,6 +21,10 @@ import { ItemCard } from "../Card";
 // #region TYPES
 interface ItemsListSetup {
 	/**
+	 * An object where each key is a company slug, and each value the number of items with this company for `item.manufacturer`
+	 */
+	readonly companyCount?: { [index: string]: number };
+	/**
 	 * The total amount of items in DB
 	 */
 	readonly count?: number;
@@ -191,12 +195,12 @@ export const ItemsList = connect(mapStateToProps)(
 
 				// #region MODELS
 				const currentPage = useMemo(
-					() => setup?.start && setup?.limit ? Math.ceil(setup?.start / setup?.limit) : 1,
+					() => setup?.start && setup?.limit ? Math.ceil((setup?.start + setup?.limit) / setup?.limit) : 1,
 					[setup?.start, setup?.limit],
 				);
 
 				const pageCount = useMemo(
-					() => setup?.count ? Math.floor(setup?.count / 16) : 0,
+					() => setup?.count ? Math.ceil(setup?.count / 16) : 0,
 					[setup?.count],
 				);
 
@@ -214,9 +218,10 @@ export const ItemsList = connect(mapStateToProps)(
 							checked: setup?.selectedCompanies?.includes(slug) || false,
 							id: slug,
 							textPrimary: name,
+							textSecondary: `(${setup?.companyCount?.[slug] || 0})`,
 						}))
 						.filter(({ textPrimary }) => textPrimary.toLowerCase().includes(setup?.manufacturerFilterSearchedtext?.toLowerCase() || "")),
-					[companies, setup?.selectedCompanies, setup?.manufacturerFilterSearchedtext],
+					[companies, setup?.companyCount, setup?.selectedCompanies, setup?.manufacturerFilterSearchedtext],
 				);
 
 				const typeFilterSelectedValue = useMemo(
@@ -252,7 +257,7 @@ export const ItemsList = connect(mapStateToProps)(
 									label,
 									limit: setup?.limit,
 									sort: setup?.sort,
-									start: pageNumber * setup?.limit,
+									start: (pageNumber - 1) * setup?.limit,
 									table: "items",
 								},
 								type: ACTIONS.FETCH_REQUESTED,
