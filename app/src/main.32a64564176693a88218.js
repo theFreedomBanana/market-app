@@ -135,8 +135,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ItemType = void 0;
 var ItemType;
 (function (ItemType) {
-    ItemType["MUG"] = "Mug";
-    ItemType["SHIRT"] = "Shirt";
+    ItemType["MUG"] = "mug";
+    ItemType["SHIRT"] = "shirt";
 })(ItemType = exports.ItemType || (exports.ItemType = {}));
 
 
@@ -178,7 +178,15 @@ const react_i18next_1 = __webpack_require__(804);
 // #region CONSTANTS
 const styles = () => (0, core_1.createStyles)({
     footer__bullet: { padding: "0 1rem" },
-    footer__container: { color: "#1EA4CE", display: "flex", justifyContent: "center", paddingBottom: "3rem" },
+    footer__container: {
+        bottom: 0,
+        color: "#1EA4CE",
+        display: "flex",
+        justifyContent: "center",
+        paddingBottom: "3rem",
+        position: "absolute",
+        width: "100%",
+    },
     footer__policy: { textTransform: "capitalize" },
 });
 const CURRENT_YEAR = new Date().getFullYear();
@@ -324,7 +332,7 @@ exports.ApplicationHeader.displayName = "applicationHeader";
 
 /***/ }),
 
-/***/ 3762:
+/***/ 4324:
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -353,30 +361,28 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ApplicationSection = void 0;
-const core_1 = __webpack_require__(2071);
+exports.ApplicationNav = void 0;
 const react_1 = __importStar(__webpack_require__(7294));
-const List_1 = __webpack_require__(8932);
+const react_redux_1 = __webpack_require__(8216);
+const react_router_1 = __webpack_require__(6550);
+const reselect_1 = __webpack_require__(573);
+const Items_1 = __webpack_require__(6611);
+// #endregion
 // #region CONSTANTS
-const styles = ({ breakpoints }) => (0, core_1.createStyles)({
-    section__container: {
-        backgroundColor: "#FAFAFA",
-        padding: "3rem 6rem",
-        [breakpoints.down("md")]: { padding: "3rem" },
-        [breakpoints.down("sm")]: { padding: "3rem 6rem" },
-        [breakpoints.down("xs")]: { padding: "3rem" },
-    },
+const selectRoute = (0, reselect_1.createSelector)([(store) => store.router], (router) => router.location);
+const mapStateToProps = (store) => ({
+    location: selectRoute(store),
 });
 // #endregion
 // #region COMPONENT
 /**
- * The main component
- * If charge of rendering the features according to navigation
+ * A component in charge of rendering the different sections according to navigation
  */
-exports.ApplicationSection = (0, core_1.withStyles)(styles)((0, react_1.memo)(({ classes }) => (react_1.default.createElement("div", { className: classes.section__container },
-    react_1.default.createElement(List_1.ItemsList, { label: "item.list" })))));
+exports.ApplicationNav = (0, react_redux_1.connect)(mapStateToProps)((0, react_1.memo)(({ location }) => (react_1.default.createElement(react_router_1.Switch, { location: location },
+    react_1.default.createElement(react_router_1.Route, { path: "/items", render: () => (react_1.default.createElement(Items_1.ItemsSection, { label: "items" })) }),
+    react_1.default.createElement(react_router_1.Redirect, { from: '*', to: "/items" })))));
 // #endregion
-exports.ApplicationSection.displayName = "applicationSection";
+exports.ApplicationNav.displayName = "applicationNav";
 
 
 /***/ }),
@@ -708,27 +714,15 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ItemsList = void 0;
-const core_1 = __webpack_require__(2071);
-const styles_1 = __webpack_require__(5549);
-const material_1 = __webpack_require__(8390);
-const clsx_1 = __importDefault(__webpack_require__(6010));
 const react_1 = __importStar(__webpack_require__(7294));
 const react_i18next_1 = __webpack_require__(804);
 const react_redux_1 = __webpack_require__(8216);
 const reselect_1 = __webpack_require__(573);
-const arrowDown_svg_1 = __importDefault(__webpack_require__(2540));
 const Item_1 = __webpack_require__(4455);
 const actions_1 = __webpack_require__(5890);
-const Pagination_1 = __webpack_require__(8800);
-const FilterCheckbox_1 = __webpack_require__(5170);
-const SortRadio_1 = __webpack_require__(1551);
-const Cart_1 = __webpack_require__(1428);
-const Card_1 = __webpack_require__(4461);
+const view_1 = __webpack_require__(633);
 // #endregion
 // #region CONSTANTS
 const selectSetup = (0, reselect_1.createSelector)([(store) => store.controllers.feature], (feature) => (label) => {
@@ -757,7 +751,272 @@ const mapStateToProps = (store, { label }) => ({
     label,
     setup: selectSetup(store)(label),
 });
-const styles = ({ breakpoints }) => (0, core_1.createStyles)({
+// #region
+// #region COMPONENT
+/**
+ * A feature that dispays a list of items
+ */
+exports.ItemsList = (0, react_redux_1.connect)(mapStateToProps)((0, react_1.memo)(({ companies, dispatch, items, label, setup }) => {
+    const { t } = (0, react_i18next_1.useTranslation)();
+    (0, react_1.useEffect)(() => () => { dispatch({ label, type: actions_1.ACTIONS.DELETE_FEATURE }); }, [dispatch, label]);
+    (0, react_1.useEffect)(() => {
+        dispatch({
+            data: {
+                className: "item",
+                filters: [{ key: "itemType", value: Item_1.ItemType.MUG }],
+                label,
+                limit: 16,
+                sort: { key: "price", value: "asc" },
+                start: 0,
+                table: "items",
+            },
+            type: actions_1.ACTIONS.FETCH_RECORDS_REQUEST,
+        });
+        dispatch({ data: { className: "company", table: "companies" }, type: actions_1.ACTIONS.FETCH_RECORDS_REQUEST });
+        dispatch({ data: { filter: "company", label }, type: actions_1.ACTIONS.FETCH_COUNTS_REQUEST });
+        dispatch({ data: { filter: "tags", label }, type: actions_1.ACTIONS.FETCH_COUNTS_REQUEST });
+    }, [dispatch, label]);
+    // #region MODELS
+    const currentPage = (0, react_1.useMemo)(() => (setup === null || setup === void 0 ? void 0 : setup.start) && (setup === null || setup === void 0 ? void 0 : setup.limit) ? Math.ceil(((setup === null || setup === void 0 ? void 0 : setup.start) + (setup === null || setup === void 0 ? void 0 : setup.limit)) / (setup === null || setup === void 0 ? void 0 : setup.limit)) : 1, [setup === null || setup === void 0 ? void 0 : setup.start, setup === null || setup === void 0 ? void 0 : setup.limit]);
+    const pageCount = (0, react_1.useMemo)(() => (setup === null || setup === void 0 ? void 0 : setup.count) ? Math.ceil((setup === null || setup === void 0 ? void 0 : setup.count) / 16) : 0, [setup === null || setup === void 0 ? void 0 : setup.count]);
+    const sortOptions = (0, react_1.useMemo)(() => ["lowToHigh", "highToLow", "newToOld", "oldToNew"].map((id) => ({
+        id,
+        text: t(`Feature:Items:List:${id}`),
+    })), [t]);
+    const manufacturerFilterOptions = (0, react_1.useMemo)(() => (companies || [])
+        .map(({ name, slug }) => {
+        var _a, _b;
+        return ({
+            checked: ((_a = setup === null || setup === void 0 ? void 0 : setup.selectedCompanies) === null || _a === void 0 ? void 0 : _a.includes(slug)) || false,
+            id: slug,
+            textPrimary: name,
+            textSecondary: `(${((_b = setup === null || setup === void 0 ? void 0 : setup.companyCount) === null || _b === void 0 ? void 0 : _b[slug]) || 0})`,
+        });
+    })
+        .filter(({ textPrimary }) => { var _a; return textPrimary.toLowerCase().includes(((_a = setup === null || setup === void 0 ? void 0 : setup.manufacturerFilterSearchedtext) === null || _a === void 0 ? void 0 : _a.toLowerCase()) || ""); }), [companies, setup === null || setup === void 0 ? void 0 : setup.companyCount, setup === null || setup === void 0 ? void 0 : setup.selectedCompanies, setup === null || setup === void 0 ? void 0 : setup.manufacturerFilterSearchedtext]);
+    const typeFilterSelectedValue = (0, react_1.useMemo)(() => {
+        var _a;
+        if (setup === null || setup === void 0 ? void 0 : setup.filters) {
+            return (_a = setup.filters.find(({ key }) => key === "itemType")) === null || _a === void 0 ? void 0 : _a.value;
+        }
+        else {
+            return undefined;
+        }
+    }, [setup === null || setup === void 0 ? void 0 : setup.filters]);
+    const typeFilterOptions = (0, react_1.useMemo)(() => Object.values(Item_1.ItemType).map((type) => ({
+        text: t(`Information:Item:type:${type}`),
+        value: type,
+    })), [t]);
+    const tagFilterOptions = (0, react_1.useMemo)(() => Object.entries((setup === null || setup === void 0 ? void 0 : setup.tagsCount) || {}).map(([name, count]) => {
+        var _a;
+        return ({
+            checked: ((_a = setup === null || setup === void 0 ? void 0 : setup.selectedTags) === null || _a === void 0 ? void 0 : _a.includes(name)) || false,
+            id: name,
+            textPrimary: name,
+            textSecondary: `(${count})`,
+        });
+    }).filter(({ textPrimary }) => { var _a; return textPrimary.toLowerCase().includes(((_a = setup === null || setup === void 0 ? void 0 : setup.tagFilterSearchedtext) === null || _a === void 0 ? void 0 : _a.toLowerCase()) || ""); }), [setup === null || setup === void 0 ? void 0 : setup.selectedTags, setup === null || setup === void 0 ? void 0 : setup.tagsCount, setup === null || setup === void 0 ? void 0 : setup.tagFilterSearchedtext]);
+    // #endregion
+    // #region EVENTS
+    const navigateToPage = (0, react_1.useCallback)((pageNumber) => {
+        if (setup === null || setup === void 0 ? void 0 : setup.limit) {
+            dispatch({
+                data: {
+                    className: "item",
+                    filters: setup === null || setup === void 0 ? void 0 : setup.filters,
+                    label,
+                    limit: setup === null || setup === void 0 ? void 0 : setup.limit,
+                    sort: setup === null || setup === void 0 ? void 0 : setup.sort,
+                    start: (pageNumber - 1) * (setup === null || setup === void 0 ? void 0 : setup.limit),
+                    table: "items",
+                },
+                type: actions_1.ACTIONS.FETCH_RECORDS_REQUEST,
+            });
+        }
+    }, [dispatch, label, setup === null || setup === void 0 ? void 0 : setup.filters, setup === null || setup === void 0 ? void 0 : setup.limit, setup === null || setup === void 0 ? void 0 : setup.sort]);
+    const filterItemsByType = (0, react_1.useCallback)((event) => {
+        var _a, _b;
+        if ((_a = event.currentTarget.dataset) === null || _a === void 0 ? void 0 : _a.value) {
+            dispatch({
+                data: {
+                    className: "item",
+                    filters: (((_b = setup === null || setup === void 0 ? void 0 : setup.filters) === null || _b === void 0 ? void 0 : _b.filter((filter) => filter.key !== "itemType")) || [])
+                        .concat({ key: "itemType", value: event.currentTarget.dataset.value }),
+                    label,
+                    limit: setup === null || setup === void 0 ? void 0 : setup.limit,
+                    sort: setup === null || setup === void 0 ? void 0 : setup.sort,
+                    start: 0,
+                    table: "items",
+                },
+                type: actions_1.ACTIONS.FETCH_RECORDS_REQUEST,
+            });
+        }
+    }, [dispatch, label, setup === null || setup === void 0 ? void 0 : setup.filters, setup === null || setup === void 0 ? void 0 : setup.limit, setup === null || setup === void 0 ? void 0 : setup.sort]);
+    const sortItemsBy = (0, react_1.useCallback)((event) => {
+        let sort;
+        switch (event.currentTarget.value) {
+            case "lowToHigh":
+                sort = { key: "price", value: "asc" };
+                break;
+            case "highToLow":
+                sort = { key: "price", value: "desc" };
+                break;
+            case "newToOld":
+                sort = { key: "added", value: "desc" };
+                break;
+            case "oldToNew":
+                sort = { key: "added", value: "asc" };
+                break;
+        }
+        dispatch({
+            data: {
+                className: "item",
+                filters: setup === null || setup === void 0 ? void 0 : setup.filters,
+                label,
+                limit: setup === null || setup === void 0 ? void 0 : setup.limit,
+                sort,
+                start: 0,
+                table: "items",
+            },
+            type: actions_1.ACTIONS.FETCH_RECORDS_REQUEST,
+        });
+    }, [dispatch, label, setup === null || setup === void 0 ? void 0 : setup.filters, setup === null || setup === void 0 ? void 0 : setup.limit]);
+    const updateManufacturersFilterList = (0, react_1.useCallback)((event) => {
+        var _a;
+        const value = (_a = event === null || event === void 0 ? void 0 : event.currentTarget) === null || _a === void 0 ? void 0 : _a.value;
+        setTimeout(() => {
+            dispatch({
+                label,
+                manufacturerFilterSearchedtext: value,
+                type: actions_1.ACTIONS.UPDATE_FEATURE,
+            });
+        }, 300);
+    }, [dispatch, label]);
+    const filterItemsByManufacturer = (0, react_1.useCallback)((event) => {
+        if (event === null || event === void 0 ? void 0 : event.currentTarget) {
+            const { checked, value } = event.currentTarget;
+            const selectedCompanies = [...(setup === null || setup === void 0 ? void 0 : setup.selectedCompanies) || []];
+            checked
+                ? selectedCompanies.push(value)
+                : selectedCompanies.splice(selectedCompanies.indexOf(value), 1);
+            dispatch({
+                label,
+                selectedCompanies,
+                type: actions_1.ACTIONS.UPDATE_FEATURE,
+            });
+            dispatch({
+                data: {
+                    className: "item",
+                    filters: checked
+                        ? ((setup === null || setup === void 0 ? void 0 : setup.filters) || []).concat({ key: "manufacturer", value })
+                        : ((setup === null || setup === void 0 ? void 0 : setup.filters) || []).filter((filter) => !(filter.key === "manufacturer" && filter.value === value)),
+                    label,
+                    limit: setup === null || setup === void 0 ? void 0 : setup.limit,
+                    sort: setup === null || setup === void 0 ? void 0 : setup.sort,
+                    start: setup === null || setup === void 0 ? void 0 : setup.start,
+                    table: "items",
+                },
+                type: actions_1.ACTIONS.FETCH_RECORDS_REQUEST,
+            });
+        }
+    }, [dispatch, label, setup === null || setup === void 0 ? void 0 : setup.filters, setup === null || setup === void 0 ? void 0 : setup.limit, setup === null || setup === void 0 ? void 0 : setup.selectedCompanies, setup === null || setup === void 0 ? void 0 : setup.sort, setup === null || setup === void 0 ? void 0 : setup.start]);
+    const updateTagsFilterList = (0, react_1.useCallback)((event) => {
+        var _a;
+        const value = (_a = event === null || event === void 0 ? void 0 : event.currentTarget) === null || _a === void 0 ? void 0 : _a.value;
+        setTimeout(() => {
+            dispatch({
+                label,
+                tagFilterSearchedtext: value,
+                type: actions_1.ACTIONS.UPDATE_FEATURE,
+            });
+        }, 300);
+    }, [dispatch, label]);
+    const filterItemsByTag = (0, react_1.useCallback)((event) => {
+        if (event === null || event === void 0 ? void 0 : event.currentTarget) {
+            const { checked, value } = event.currentTarget;
+            const selectedTags = [...(setup === null || setup === void 0 ? void 0 : setup.selectedTags) || []];
+            checked
+                ? selectedTags.push(value)
+                : selectedTags.splice(selectedTags.indexOf(value), 1);
+            dispatch({
+                label,
+                selectedTags,
+                type: actions_1.ACTIONS.UPDATE_FEATURE,
+            });
+            dispatch({
+                data: {
+                    className: "item",
+                    filters: checked
+                        ? ((setup === null || setup === void 0 ? void 0 : setup.filters) || []).concat({ key: "tags", value })
+                        : ((setup === null || setup === void 0 ? void 0 : setup.filters) || []).filter((filter) => !(filter.key === "tags" && filter.value === value)),
+                    label,
+                    limit: setup === null || setup === void 0 ? void 0 : setup.limit,
+                    sort: setup === null || setup === void 0 ? void 0 : setup.sort,
+                    start: setup === null || setup === void 0 ? void 0 : setup.start,
+                    table: "items",
+                },
+                type: actions_1.ACTIONS.FETCH_RECORDS_REQUEST,
+            });
+        }
+    }, [dispatch, label, setup === null || setup === void 0 ? void 0 : setup.filters, setup === null || setup === void 0 ? void 0 : setup.limit, setup === null || setup === void 0 ? void 0 : setup.selectedTags, setup === null || setup === void 0 ? void 0 : setup.sort, setup === null || setup === void 0 ? void 0 : setup.start]);
+    // #endregion
+    // #region RENDERING
+    return (react_1.default.createElement(view_1.View, { currentPage: currentPage, filterItemsByTag: filterItemsByTag, filterItemsByType: filterItemsByType, filterItemsByManufacturer: filterItemsByManufacturer, items: items, manufacturerFilterOptions: manufacturerFilterOptions, navigateToPage: navigateToPage, pageCount: pageCount, sortItemsBy: sortItemsBy, sortOptions: sortOptions, tagFilterOptions: tagFilterOptions, typeFilterOptions: typeFilterOptions, typeFilterSelectedValue: typeFilterSelectedValue, updateManufacturersFilterList: updateManufacturersFilterList, updateTagsFilterList: updateTagsFilterList }));
+    // #endregion
+}));
+// #endregion
+exports.ItemsList.displayName = "itemsList";
+
+
+/***/ }),
+
+/***/ 633:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.View = void 0;
+const core_1 = __webpack_require__(2071);
+const styles_1 = __webpack_require__(5549);
+const material_1 = __webpack_require__(8390);
+const react_1 = __importStar(__webpack_require__(7294));
+const react_i18next_1 = __webpack_require__(804);
+const arrowDown_svg_1 = __importDefault(__webpack_require__(2540));
+const Pagination_1 = __webpack_require__(4525);
+const FilterButton_1 = __webpack_require__(7768);
+const FilterCheckbox_1 = __webpack_require__(5384);
+const SortRadio_1 = __webpack_require__(1240);
+const Card_1 = __webpack_require__(4461);
+// #endregion
+// #endregion CONSTANTS
+const styles = () => (0, core_1.createStyles)({
     list__cartContainer: { border: "8px solid #1EA4CE", borderRadius: "2px", display: "flex", maxHeight: "500px" },
     list__container: { marginBottom: "2rem", padding: "1rem" },
     list__filterAccordionDetails: { padding: 0 },
@@ -786,8 +1045,9 @@ const styles = ({ breakpoints }) => (0, core_1.createStyles)({
         top: 0,
     },
     list__loaderSvg: { color: "#1EA4CE" },
-    list__sortRadio: {
-        [breakpoints.up("md")]: { marginBottom: "2rem" },
+    list__noItemFound: { color: "#525252", fontStyle: "italic" },
+    list__sideContainer: {
+        "& > :not(:last-child)": { marginBottom: "2rem" },
     },
     list__title: {
         backgroundColor: "#FAFAFA",
@@ -797,204 +1057,193 @@ const styles = ({ breakpoints }) => (0, core_1.createStyles)({
         size: "20px",
     },
 });
-// #region
+// #endregion
 // #region COMPONENT
 /**
- * A feature that dispays a list of items
+ * A view for the ItemsList component
  */
-exports.ItemsList = (0, react_redux_1.connect)(mapStateToProps)((0, core_1.withStyles)(styles)((0, react_1.memo)(({ classes, companies, dispatch, items, label, setup }) => {
-    var _a, _b;
+exports.View = (0, core_1.withStyles)(styles)((0, react_1.memo)(({ classes, currentPage, filterItemsByManufacturer, filterItemsByTag, filterItemsByType, items, manufacturerFilterOptions, navigateToPage, pageCount, sortItemsBy, sortOptions, tagFilterOptions, typeFilterOptions, typeFilterSelectedValue, updateManufacturersFilterList, updateTagsFilterList, }) => {
     const { t } = (0, react_i18next_1.useTranslation)();
     const smBreakpoint = (0, core_1.useMediaQuery)((0, styles_1.useTheme)().breakpoints.down("sm"));
-    const mdBreakpoint = (0, core_1.useMediaQuery)((0, styles_1.useTheme)().breakpoints.up("md"));
-    (0, react_1.useEffect)(() => {
-        dispatch({
-            data: {
-                className: "item",
-                filters: [{ key: "itemType", value: Item_1.ItemType.MUG }],
-                label,
-                limit: 16,
-                sort: { key: "price", value: "asc" },
-                start: 0,
-                table: "items",
-            },
-            type: actions_1.ACTIONS.FETCH_REQUESTED,
-        });
-        dispatch({ data: { className: "company", table: "companies" }, type: actions_1.ACTIONS.FETCH_REQUESTED });
-    }, [dispatch, label]);
-    // #region MODELS
-    const currentPage = (0, react_1.useMemo)(() => (setup === null || setup === void 0 ? void 0 : setup.start) && (setup === null || setup === void 0 ? void 0 : setup.limit) ? Math.ceil((setup === null || setup === void 0 ? void 0 : setup.start) / (setup === null || setup === void 0 ? void 0 : setup.limit)) : 1, [setup === null || setup === void 0 ? void 0 : setup.start, setup === null || setup === void 0 ? void 0 : setup.limit]);
-    const pageCount = (0, react_1.useMemo)(() => (setup === null || setup === void 0 ? void 0 : setup.count) ? Math.floor((setup === null || setup === void 0 ? void 0 : setup.count) / 16) : 0, [setup === null || setup === void 0 ? void 0 : setup.count]);
-    const sortOptions = (0, react_1.useMemo)(() => ["lowToHigh", "highToLow", "newToOld", "oldToNew"].map((id) => ({
-        id,
-        text: t(`Feature:Items:List:${id}`),
-    })), [t]);
-    const manufacturerFilterOptions = (0, react_1.useMemo)(() => (companies || [])
-        .map(({ name, slug }) => {
-        var _a;
-        return ({
-            checked: ((_a = setup === null || setup === void 0 ? void 0 : setup.selectedCompanies) === null || _a === void 0 ? void 0 : _a.includes(slug)) || false,
-            id: slug,
-            textPrimary: name,
-        });
-    })
-        .filter(({ textPrimary }) => { var _a; return textPrimary.toLowerCase().includes(((_a = setup === null || setup === void 0 ? void 0 : setup.manufacturerFilterSearchedtext) === null || _a === void 0 ? void 0 : _a.toLowerCase()) || ""); }), [companies, setup === null || setup === void 0 ? void 0 : setup.selectedCompanies, setup === null || setup === void 0 ? void 0 : setup.manufacturerFilterSearchedtext]);
-    // #endregion
-    // #region EVENTS
-    const navigateToPage = (0, react_1.useCallback)((pageNumber) => {
-        if (setup === null || setup === void 0 ? void 0 : setup.limit) {
-            dispatch({
-                data: {
-                    className: "item",
-                    filters: setup === null || setup === void 0 ? void 0 : setup.filters,
-                    label,
-                    limit: setup === null || setup === void 0 ? void 0 : setup.limit,
-                    sort: setup === null || setup === void 0 ? void 0 : setup.sort,
-                    start: pageNumber * (setup === null || setup === void 0 ? void 0 : setup.limit),
-                    table: "items",
-                },
-                type: actions_1.ACTIONS.FETCH_REQUESTED,
-            });
-        }
-    }, [dispatch, label, setup === null || setup === void 0 ? void 0 : setup.filters, setup === null || setup === void 0 ? void 0 : setup.limit, setup === null || setup === void 0 ? void 0 : setup.sort]);
-    const searchItemsWithItemType = (0, react_1.useCallback)((itemType) => {
-        var _a;
-        dispatch({
-            data: {
-                className: "item",
-                filters: (((_a = setup === null || setup === void 0 ? void 0 : setup.filters) === null || _a === void 0 ? void 0 : _a.filter((filter) => filter.key !== "itemType")) || []).concat({ key: "itemType", value: itemType }),
-                label,
-                limit: setup === null || setup === void 0 ? void 0 : setup.limit,
-                sort: setup === null || setup === void 0 ? void 0 : setup.sort,
-                start: 0,
-                table: "items",
-            },
-            type: actions_1.ACTIONS.FETCH_REQUESTED,
-        });
-    }, [dispatch, label, setup === null || setup === void 0 ? void 0 : setup.filters, setup === null || setup === void 0 ? void 0 : setup.limit, setup === null || setup === void 0 ? void 0 : setup.sort]);
-    const searchItemsBy = (0, react_1.useCallback)((event) => {
-        let sort;
-        switch (event.currentTarget.value) {
-            case "lowToHigh":
-                sort = { key: "price", value: "asc" };
-                break;
-            case "highToLow":
-                sort = { key: "price", value: "desc" };
-                break;
-            case "newToOld":
-                sort = { key: "added", value: "desc" };
-                break;
-            case "oldToNew":
-                sort = { key: "added", value: "asc" };
-                break;
-        }
-        dispatch({
-            data: {
-                className: "item",
-                filters: setup === null || setup === void 0 ? void 0 : setup.filters,
-                label,
-                limit: setup === null || setup === void 0 ? void 0 : setup.limit,
-                sort,
-                start: 0,
-                table: "items",
-            },
-            type: actions_1.ACTIONS.FETCH_REQUESTED,
-        });
-    }, [dispatch, label, setup === null || setup === void 0 ? void 0 : setup.filters, setup === null || setup === void 0 ? void 0 : setup.limit]);
-    const updateManufacturersFilterList = (0, react_1.useCallback)((event) => {
-        var _a;
-        const value = (_a = event === null || event === void 0 ? void 0 : event.currentTarget) === null || _a === void 0 ? void 0 : _a.value;
-        setTimeout(() => {
-            dispatch({
-                label,
-                manufacturerFilterSearchedtext: value,
-                type: actions_1.ACTIONS.UPDATE_FEATURE,
-            });
-        }, 300);
-    }, [dispatch, label]);
-    const filterItemsPerManufacturer = (0, react_1.useCallback)((event) => {
-        if (event === null || event === void 0 ? void 0 : event.currentTarget) {
-            const { checked, value } = event.currentTarget;
-            const selectedCompanies = [...(setup === null || setup === void 0 ? void 0 : setup.selectedCompanies) || []];
-            checked
-                ? selectedCompanies.push(value)
-                : selectedCompanies.splice(selectedCompanies.indexOf(value), 1);
-            dispatch({
-                label,
-                selectedCompanies,
-                type: actions_1.ACTIONS.UPDATE_FEATURE,
-            });
-            dispatch({
-                data: {
-                    className: "item",
-                    filters: checked
-                        ? ((setup === null || setup === void 0 ? void 0 : setup.filters) || []).concat({ key: "manufacturer", value })
-                        : ((setup === null || setup === void 0 ? void 0 : setup.filters) || []).filter((filter) => !(filter.key === "manufacturer" && filter.value === value)),
-                    label,
-                    limit: setup === null || setup === void 0 ? void 0 : setup.limit,
-                    sort: setup === null || setup === void 0 ? void 0 : setup.sort,
-                    start: setup === null || setup === void 0 ? void 0 : setup.start,
-                    table: "items",
-                },
-                type: actions_1.ACTIONS.FETCH_REQUESTED,
-            });
-        }
-    }, [dispatch, label, setup === null || setup === void 0 ? void 0 : setup.filters, setup === null || setup === void 0 ? void 0 : setup.limit, setup === null || setup === void 0 ? void 0 : setup.selectedCompanies, setup === null || setup === void 0 ? void 0 : setup.sort, setup === null || setup === void 0 ? void 0 : setup.start]);
-    // #endregion
+    console.log("items: ", items);
     // #region RENDERING
     return (react_1.default.createElement(core_1.Grid, { container: true, spacing: 2 },
-        react_1.default.createElement(core_1.Grid, { item: true, md: 3, xs: 12 }, smBreakpoint
+        react_1.default.createElement(core_1.Grid, { item: true, md: 4, xs: 12 }, smBreakpoint
             ? (react_1.default.createElement(react_1.default.Fragment, null,
                 react_1.default.createElement(core_1.Accordion, null,
                     react_1.default.createElement(core_1.AccordionSummary, { className: classes.list__filterAccordionSummary, expandIcon: react_1.default.createElement(arrowDown_svg_1.default, { className: classes.list__filterAccordionIcon }) },
                         react_1.default.createElement(core_1.Typography, null, t("Feature:Items:List:sorting"))),
                     react_1.default.createElement(core_1.AccordionDetails, { classes: { root: classes.list__filterAccordionDetails } },
-                        react_1.default.createElement(SortRadio_1.SortRadio, { custom: {
-                                formControlProps: {
-                                    classes: { root: classes.list__sortRadio },
-                                },
-                            }, defaultOption: sortOptions[0], onChangeEventHandler: searchItemsBy, options: sortOptions }))),
+                        react_1.default.createElement(SortRadio_1.SortRadio, { defaultOption: sortOptions[0], onChangeEventHandler: sortItemsBy, options: sortOptions }))),
                 react_1.default.createElement(core_1.Accordion, null,
                     react_1.default.createElement(core_1.AccordionSummary, { className: classes.list__filterAccordionSummary, expandIcon: react_1.default.createElement(arrowDown_svg_1.default, { className: classes.list__filterAccordionIcon }) },
                         react_1.default.createElement(core_1.Typography, null, t("Feature:Items:List:brands"))),
                     react_1.default.createElement(core_1.AccordionDetails, { classes: { root: classes.list__filterAccordionDetails } },
-                        react_1.default.createElement(FilterCheckbox_1.FilterCheckbox, { checkboxOnChangeEventHandler: filterItemsPerManufacturer, options: manufacturerFilterOptions, placeholder: t("Feature:Items:List:searchBrand"), textInputOnChangeEventHandler: updateManufacturersFilterList }))))) : (react_1.default.createElement(react_1.default.Fragment, null,
-            react_1.default.createElement(SortRadio_1.SortRadio, { custom: {
-                    formControlProps: {
-                        classes: { root: classes.list__sortRadio },
-                    },
-                }, defaultOption: sortOptions[0], label: t("Feature:Items:List:sorting"), onChangeEventHandler: searchItemsBy, options: sortOptions }),
-            react_1.default.createElement(FilterCheckbox_1.FilterCheckbox, { checkboxOnChangeEventHandler: filterItemsPerManufacturer, label: t("Feature:Items:List:brands"), options: manufacturerFilterOptions, placeholder: t("Feature:Items:List:searchBrand"), textInputOnChangeEventHandler: updateManufacturersFilterList })))),
-        react_1.default.createElement(core_1.Grid, { item: true, md: 6, xs: 12 },
+                        react_1.default.createElement(FilterCheckbox_1.FilterCheckbox, { checkboxOnChangeEventHandler: filterItemsByManufacturer, options: manufacturerFilterOptions, placeholder: t("Feature:Items:List:searchBrand"), textInputOnChangeEventHandler: updateManufacturersFilterList }))),
+                react_1.default.createElement(core_1.Accordion, null,
+                    react_1.default.createElement(core_1.AccordionSummary, { className: classes.list__filterAccordionSummary, expandIcon: react_1.default.createElement(arrowDown_svg_1.default, { className: classes.list__filterAccordionIcon }) },
+                        react_1.default.createElement(core_1.Typography, null, t("Feature:Items:List:tags"))),
+                    react_1.default.createElement(core_1.AccordionDetails, { classes: { root: classes.list__filterAccordionDetails } },
+                        react_1.default.createElement(FilterCheckbox_1.FilterCheckbox, { checkboxOnChangeEventHandler: filterItemsByTag, options: tagFilterOptions, placeholder: t("Feature:Items:List:searchTag"), textInputOnChangeEventHandler: updateTagsFilterList }))))) : (react_1.default.createElement("div", { className: classes.list__sideContainer },
+            react_1.default.createElement(SortRadio_1.SortRadio, { defaultOption: sortOptions[0], label: t("Feature:Items:List:sorting"), onChangeEventHandler: sortItemsBy, options: sortOptions }),
+            react_1.default.createElement(FilterCheckbox_1.FilterCheckbox, { checkboxOnChangeEventHandler: filterItemsByManufacturer, label: t("Feature:Items:List:brands"), options: manufacturerFilterOptions, placeholder: t("Feature:Items:List:searchBrand"), textInputOnChangeEventHandler: updateManufacturersFilterList }),
+            react_1.default.createElement(FilterCheckbox_1.FilterCheckbox, { checkboxOnChangeEventHandler: filterItemsByTag, label: t("Feature:Items:List:tags"), options: tagFilterOptions, placeholder: t("Feature:Items:List:searchTag"), textInputOnChangeEventHandler: updateTagsFilterList })))),
+        react_1.default.createElement(core_1.Grid, { item: true, md: 8, xs: 12 },
             react_1.default.createElement(core_1.Typography, { className: classes.list__title, variant: "h4" }, t("Feature:Items:List:products")),
-            react_1.default.createElement("div", { className: classes.list__filterContainer },
-                react_1.default.createElement("div", { className: (0, clsx_1.default)(classes.list__filterItem, ((_a = setup === null || setup === void 0 ? void 0 : setup.filters) === null || _a === void 0 ? void 0 : _a.find(({ key, value }) => key === "itemType" && value === Item_1.ItemType.MUG))
-                        ? classes["list__filterItem--enabled"]
-                        : classes["list__filterItem--disabled"]), onClick: () => searchItemsWithItemType(Item_1.ItemType.MUG) }, t("Feature:Items:List:mug")),
-                react_1.default.createElement("div", { className: (0, clsx_1.default)(classes.list__filterItem, ((_b = setup === null || setup === void 0 ? void 0 : setup.filters) === null || _b === void 0 ? void 0 : _b.find(({ key, value }) => key === "itemType" && value === Item_1.ItemType.SHIRT))
-                        ? classes["list__filterItem--enabled"]
-                        : classes["list__filterItem--disabled"]), onClick: () => searchItemsWithItemType(Item_1.ItemType.SHIRT) }, t("Feature:Items:List:shirt"))),
+            typeFilterOptions && (react_1.default.createElement("div", { className: classes.list__filterContainer },
+                react_1.default.createElement(FilterButton_1.FilterButton, { onSelectCallback: filterItemsByType, options: typeFilterOptions, selectedValue: typeFilterSelectedValue }))),
             !(items)
                 ? (react_1.default.createElement(material_1.CircularProgress, { classes: {
                         root: classes.list__loaderContainer,
                         svg: classes.list__loaderSvg,
-                    } })) : (react_1.default.createElement(react_1.default.Fragment, null,
+                    } })) : (react_1.default.createElement(react_1.default.Fragment, null, items.length === 0
+                ? (react_1.default.createElement(core_1.Typography, { className: classes.list__noItemFound }, t("Feature:Items:List:noItemFound"))) : (react_1.default.createElement(react_1.default.Fragment, null,
                 react_1.default.createElement(core_1.Paper, { className: classes.list__container, elevation: 2 },
                     react_1.default.createElement(core_1.Grid, { container: true, spacing: 2 }, items.map((item) => (react_1.default.createElement(core_1.Grid, { item: true, key: item.slug, xs: 12, lg: 3 },
                         react_1.default.createElement(Card_1.ItemCard, { item: item, label: "cart" })))))),
-                react_1.default.createElement(Pagination_1.Pagination, { currentPage: currentPage, navigateToPage: navigateToPage, pageCount: pageCount })))),
-        mdBreakpoint && (react_1.default.createElement(core_1.Grid, { item: true, md: 3 },
-            react_1.default.createElement("div", { className: classes.list__cartContainer },
-                react_1.default.createElement(Cart_1.Cart, { label: "cart" }))))));
+                react_1.default.createElement(Pagination_1.Pagination, { currentPage: currentPage, navigateToPage: navigateToPage, pageCount: pageCount }))))))));
     // #endregion
-})));
+}));
 // #endregion
-exports.ItemsList.displayName = "itemsList";
 
 
 /***/ }),
 
-/***/ 5170:
+/***/ 6611:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ItemsSection = void 0;
+const core_1 = __webpack_require__(2071);
+const styles_1 = __webpack_require__(5549);
+const react_1 = __importStar(__webpack_require__(7294));
+const Cart_1 = __webpack_require__(1428);
+const List_1 = __webpack_require__(8932);
+// #endregion
+// #region CONSTANTS
+const styles = ({ breakpoints }) => (0, core_1.createStyles)({
+    section__cartContainer: { border: "8px solid #1EA4CE", borderRadius: "2px", display: "flex", maxHeight: "500px" },
+    section__container: {
+        backgroundColor: "#FAFAFA",
+        padding: "3rem 6rem 9rem",
+        [breakpoints.down("md")]: { paddingLeft: "3rem", paddingRight: "3rem" },
+        [breakpoints.down("sm")]: { paddingLeft: "6rem", paddingRight: "6rem" },
+        [breakpoints.down("xs")]: { paddingLeft: "3rem", paddingRight: "3rem" },
+    },
+});
+// #endregion
+// #region COMPONENT
+/**
+ * A container component in charge of rendering everything item related
+ */
+exports.ItemsSection = (0, core_1.withStyles)(styles)((0, react_1.memo)(({ classes, label }) => {
+    const lgBreakpoint = (0, core_1.useMediaQuery)((0, styles_1.useTheme)().breakpoints.up("lg"));
+    // #region RENDERING
+    return (react_1.default.createElement("div", { className: classes.section__container },
+        react_1.default.createElement(core_1.Grid, { container: true, spacing: 2 },
+            react_1.default.createElement(core_1.Grid, { item: true, lg: 9, xs: 12 },
+                react_1.default.createElement(List_1.ItemsList, { label: `${label}.list` })),
+            lgBreakpoint && (react_1.default.createElement(core_1.Grid, { item: true, lg: 3 },
+                react_1.default.createElement("div", { className: classes.section__cartContainer },
+                    react_1.default.createElement(Cart_1.Cart, { label: "cart" })))))));
+    // #endregion
+}));
+// #endregion
+exports.ItemsSection.displayName = "ItemsSection";
+
+
+/***/ }),
+
+/***/ 7768:
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.FilterButton = void 0;
+const core_1 = __webpack_require__(2071);
+const clsx_1 = __importDefault(__webpack_require__(6010));
+const react_1 = __importStar(__webpack_require__(7294));
+const styles = () => (0, core_1.createStyles)({
+    list__filterItem: {
+        "&:hover": { boxShadow: "0px 4px 4px 0px rgba(0, 0, 0, .25)" },
+        borderRadius: "2px",
+        cursor: "pointer",
+        display: "inline-block",
+        fontSize: ".8rem",
+        fontWeight: 600,
+        marginRight: "1rem",
+        padding: "0.5rem 1rem",
+        textTransform: "lowercase",
+    },
+    "list__filterItem--selected": { backgroundColor: "#1EA4CE", color: "#FFFFFF" },
+    "list__filterItem--unselected": { backgroundColor: "#F2F0FD", color: "#1EA4CE" },
+});
+// #endregion
+// #region COMPONENT
+/**
+ * A component that acts as radio inputs but with a button like design
+ */
+exports.FilterButton = (0, core_1.withStyles)(styles)((0, react_1.memo)(({ classes, onSelectCallback, options, selectedValue }) => (react_1.default.createElement("div", null, options.map(({ text, value }) => (react_1.default.createElement("div", { className: (0, clsx_1.default)(classes.list__filterItem, value === selectedValue
+        ? classes["list__filterItem--selected"]
+        : classes["list__filterItem--unselected"]), "data-value": value, key: value, onClick: onSelectCallback }, text)))))));
+// #endregion
+
+
+/***/ }),
+
+/***/ 5384:
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -1086,7 +1335,7 @@ exports.FilterCheckbox.displayName = "filterCheckbox";
 
 /***/ }),
 
-/***/ 8800:
+/***/ 4525:
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -1129,11 +1378,10 @@ const arrowRight_svg_1 = __importDefault(__webpack_require__(7996));
 // #region CONSTANTS
 const styles = ({ breakpoints }) => (0, core_1.createStyles)({
     pagination__arrowIconContainer: { display: "flex" },
-    pagination__arrowNavContainer: {
+    pagination__arrowNavContainer: { alignItems: "center", color: "#697488", display: "flex" },
+    "pagination__arrowNavContainer--disabled": { color: "#A8A8A8" },
+    "pagination__arrowNavContainer--enabled": {
         "&:hover": { color: "#1EA4CE", cursor: "pointer" },
-        alignItems: "center",
-        color: "#697488",
-        display: "flex",
     },
     pagination__container: { alignItems: "center", justifyContent: "space-between", padding: "0 2rem" },
     pagination__nextNavContainer: { justifyContent: "right" },
@@ -1213,7 +1461,13 @@ exports.Pagination = (0, core_1.withStyles)(styles)((0, react_1.memo)(({ classes
         }
     }, [currentPage, pageCount]);
     return (react_1.default.createElement(core_1.Grid, { className: classes.pagination__container, container: true },
-        react_1.default.createElement(core_1.Grid, { item: true, xs: 2, className: (0, clsx_1.default)(classes.pagination__arrowNavContainer, classes.pagination__previousNavContainer), onClick: () => navigateToPage(currentPage - 1) },
+        react_1.default.createElement(core_1.Grid, { item: true, xs: 2, className: (0, clsx_1.default)(classes.pagination__arrowNavContainer, classes.pagination__previousNavContainer, currentPage <= 1
+                ? classes["pagination__arrowNavContainer--disabled"]
+                : classes["pagination__arrowNavContainer--enabled"]), onClick: () => {
+                if (currentPage > 1) {
+                    navigateToPage(currentPage - 1);
+                }
+            } },
             react_1.default.createElement("div", { className: classes.pagination__arrowIconContainer },
                 react_1.default.createElement(arrowLeft_svg_1.default, null)),
             react_1.default.createElement(core_1.Typography, { className: classes.pagination__previousNavText }, t("Feature:Items:List:previous"))),
@@ -1223,7 +1477,13 @@ exports.Pagination = (0, core_1.withStyles)(styles)((0, react_1.memo)(({ classes
                     navigateToPage(page);
                 }
             } }, computePageNumber(index) || "...")))),
-        react_1.default.createElement(core_1.Grid, { className: (0, clsx_1.default)(classes.pagination__arrowNavContainer, classes.pagination__nextNavContainer), item: true, onClick: () => navigateToPage(currentPage + 1), xs: 2 },
+        react_1.default.createElement(core_1.Grid, { className: (0, clsx_1.default)(classes.pagination__arrowNavContainer, classes.pagination__nextNavContainer, currentPage >= pageCount
+                ? classes["pagination__arrowNavContainer--disabled"]
+                : classes["pagination__arrowNavContainer--enabled"]), item: true, onClick: () => {
+                if (currentPage < pageCount) {
+                    navigateToPage(currentPage + 1);
+                }
+            }, xs: 2 },
             react_1.default.createElement(core_1.Typography, { className: classes.pagination__nextNavText }, t("Feature:Items:List:next")),
             react_1.default.createElement("div", { className: classes.pagination__arrowIconContainer },
                 react_1.default.createElement(arrowRight_svg_1.default, null)))));
@@ -1234,7 +1494,7 @@ exports.Pagination = (0, core_1.withStyles)(styles)((0, react_1.memo)(({ classes
 
 /***/ }),
 
-/***/ 1551:
+/***/ 1240:
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -1478,8 +1738,9 @@ exports.INFORMATION_ACTIONS = void 0;
  */
 var INFORMATION_ACTIONS;
 (function (INFORMATION_ACTIONS) {
-    INFORMATION_ACTIONS["FETCH_REQUESTED"] = "FETCH_REQUESTED";
-    INFORMATION_ACTIONS["FETCH_SUCCEEDED"] = "FETCH_SUCCEEDED";
+    INFORMATION_ACTIONS["FETCH_COUNTS_REQUEST"] = "FETCH_COUNTS_REQUEST";
+    INFORMATION_ACTIONS["FETCH_RECORDS_REQUEST"] = "FETCH_RECORDS_REQUEST";
+    INFORMATION_ACTIONS["FETCH_RECORDS_SUCCESS"] = "FETCH_RECORDS_SUCCESS";
 })(INFORMATION_ACTIONS = exports.INFORMATION_ACTIONS || (exports.INFORMATION_ACTIONS = {}));
 
 
@@ -1498,7 +1759,7 @@ const actions_1 = __webpack_require__(9732);
  */
 const information = (EMPTY_STATE) => (state = EMPTY_STATE, payload) => {
     var _a;
-    if (payload.type === actions_1.INFORMATION_ACTIONS.FETCH_SUCCEEDED) {
+    if (payload.type === actions_1.INFORMATION_ACTIONS.FETCH_RECORDS_SUCCESS) {
         const nextState = Object.assign(Object.assign({}, state), { [payload.className]: Object.assign(Object.assign({}, state === null || state === void 0 ? void 0 : state[payload.className]), (_a = payload.records) === null || _a === void 0 ? void 0 : _a.reduce((reduction, record) => (Object.assign(Object.assign({}, reduction), { [record.slug]: record })), {})) });
         return nextState;
     }
@@ -1532,7 +1793,7 @@ exports.ACTIONS = Object.assign(Object.assign(Object.assign(Object.assign({}, ac
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.sagaForFetchRequested = void 0;
+exports.sagasForServerRequests = void 0;
 const effects_1 = __webpack_require__(4857);
 const actions_1 = __webpack_require__(5890);
 function* fetchRecords(actionParams) {
@@ -1546,7 +1807,7 @@ function* fetchRecords(actionParams) {
         const asyncDbRequest = fetch(`${"https://market-server-prod.herokuapp.com"}/${table}?${start}${limit}${filter}${sort}`);
         const records = yield asyncDbRequest.then((response) => response.json());
         const count = yield asyncDbRequest.then((response) => response.headers.get("X-Total-Count"));
-        yield (0, effects_1.put)({ className, records, type: actions_1.ACTIONS.FETCH_SUCCEEDED });
+        yield (0, effects_1.put)({ className, records, type: actions_1.ACTIONS.FETCH_RECORDS_SUCCESS });
         if (label) {
             yield (0, effects_1.put)({
                 count: parseInt(count, 10),
@@ -1564,10 +1825,36 @@ function* fetchRecords(actionParams) {
         yield (0, effects_1.put)({ message, type: actions_1.ACTIONS.THROW_ERROR });
     }
 }
-function* sagaForFetchRequested() {
-    yield (0, effects_1.takeEvery)(actions_1.ACTIONS.FETCH_REQUESTED, fetchRecords);
+function* fetchCounts(actionParams) {
+    const { filter, label } = actionParams.data;
+    try {
+        const asyncDbRequest = fetch(`${"https://market-server-prod.herokuapp.com"}/counts/${filter}`);
+        const count = yield asyncDbRequest.then((response) => response.json());
+        if (label) {
+            yield (0, effects_1.put)({
+                label,
+                [`${filter}Count`]: count,
+                type: actions_1.ACTIONS.UPDATE_FEATURE,
+            });
+        }
+    }
+    catch ({ message }) {
+        yield (0, effects_1.put)({ message, type: actions_1.ACTIONS.THROW_ERROR });
+    }
 }
-exports.sagaForFetchRequested = sagaForFetchRequested;
+function* sagaForFetchRequested() {
+    yield (0, effects_1.takeEvery)(actions_1.ACTIONS.FETCH_RECORDS_REQUEST, fetchRecords);
+}
+function* sagaForCounts() {
+    yield (0, effects_1.takeEvery)(actions_1.ACTIONS.FETCH_COUNTS_REQUEST, fetchCounts);
+}
+function* sagasForServerRequests() {
+    yield (0, effects_1.all)([
+        sagaForFetchRequested(),
+        sagaForCounts(),
+    ]);
+}
+exports.sagasForServerRequests = sagasForServerRequests;
 
 
 /***/ }),
@@ -1604,6 +1891,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core_1 = __webpack_require__(2071);
 const styles_1 = __webpack_require__(7865);
+const connected_react_router_1 = __webpack_require__(265);
+const history_1 = __webpack_require__(9731);
 const i18next_1 = __importDefault(__webpack_require__(6073));
 const react_1 = __importDefault(__webpack_require__(7294));
 const react_dom_1 = __importDefault(__webpack_require__(3935));
@@ -1615,7 +1904,7 @@ const redux_saga_1 = __importDefault(__webpack_require__(797));
 const en_json_1 = __importDefault(__webpack_require__(726));
 const Footer_1 = __webpack_require__(9441);
 const Header_1 = __webpack_require__(9339);
-const Section_1 = __webpack_require__(3762);
+const Nav_1 = __webpack_require__(4324);
 const reducers_1 = __webpack_require__(7045);
 const reducers_2 = __webpack_require__(4665);
 const reducers_3 = __webpack_require__(6909);
@@ -1623,21 +1912,23 @@ const sagas_1 = __webpack_require__(2532);
 const Theme_1 = __webpack_require__(1948);
 const EMPTY_STATE = { item: {} };
 const sagaMiddleware = (0, redux_saga_1.default)();
-const middlewares = [];
-middlewares.push(sagaMiddleware);
+const history = (0, history_1.createBrowserHistory)();
+const middlewares = [sagaMiddleware, (0, connected_react_router_1.routerMiddleware)(history)];
 if (false) {}
 const store = (0, redux_1.createStore)((0, redux_1.combineReducers)({
     applicaton: (0, reducers_1.application)(),
     controllers: (0, reducers_2.controllers)(),
     information: (0, reducers_3.information)(EMPTY_STATE),
+    router: (0, connected_react_router_1.connectRouter)(history),
 }), (0, redux_1.applyMiddleware)(...middlewares));
-sagaMiddleware.run(sagas_1.sagaForFetchRequested);
-const App = () => (react_1.default.createElement(react_1.default.Fragment, null,
-    react_1.default.createElement(core_1.CssBaseline, null),
-    react_1.default.createElement(styles_1.ThemeProvider, { theme: Theme_1.theme },
-        react_1.default.createElement(Header_1.ApplicationHeader, { label: "header" }),
-        react_1.default.createElement(Section_1.ApplicationSection, null),
-        react_1.default.createElement(Footer_1.ApplicationFooter, null))));
+sagaMiddleware.run(sagas_1.sagasForServerRequests);
+const App = () => (react_1.default.createElement(react_redux_1.Provider, { store: store },
+    react_1.default.createElement(connected_react_router_1.ConnectedRouter, { history: history },
+        react_1.default.createElement(core_1.CssBaseline, null),
+        react_1.default.createElement(styles_1.ThemeProvider, { theme: Theme_1.theme },
+            react_1.default.createElement(Header_1.ApplicationHeader, { label: "header" }),
+            react_1.default.createElement(Nav_1.ApplicationNav, null),
+            react_1.default.createElement(Footer_1.ApplicationFooter, null)))));
 i18next_1.default.use(react_i18next_1.initReactI18next).init({
     fallbackLng: "en",
     interpolation: {
@@ -1648,8 +1939,7 @@ i18next_1.default.use(react_i18next_1.initReactI18next).init({
         en: en_json_1.default,
     },
 }).then(() => {
-    react_dom_1.default.render(react_1.default.createElement(react_redux_1.Provider, { store: store },
-        react_1.default.createElement(App, null)), document.getElementById("root"));
+    react_dom_1.default.render(react_1.default.createElement(App, null), document.getElementById("root"));
 });
 
 
@@ -1667,14 +1957,14 @@ module.exports = __webpack_require__.p + "res/images/logo.png";
 /***/ ((module) => {
 
 "use strict";
-module.exports = JSON.parse('{"Application":{"Footer":{"name":"Market","policy":"Private policy"}},"Feature":{"Items":{"Card":{"add":"Add"},"List":{"brands":"Brands","highToLow":"Price high to low","lowToHigh":"Price low to High","mug":"Mug","next":"Next","newToOld":"New to Old","oldToNew":"Old to new","previous":"Prev","products":"Products","searchBrand":"Search brand","shirt":"Shirt","sorting":"Sorting"}}}}');
+module.exports = JSON.parse('{"Application":{"Footer":{"name":"Market","policy":"Private policy"}},"Feature":{"Items":{"Card":{"add":"Add"},"List":{"brands":"Brands","highToLow":"Price high to low","lowToHigh":"Price low to High","mug":"Mug","next":"Next","newToOld":"New to Old","noItemFound":"Sorry, we can\'t find any item matching your request...","oldToNew":"Old to new","previous":"Prev","products":"Products","searchBrand":"Search brand","searchTag":"Search tag","shirt":"Shirt","sorting":"Sorting","tags":"Tags"}}},"Information":{"Item":{"type":{"mug":"Mug","shirt":"Shirt"}}}}');
 
 /***/ })
 
 },
 /******/ __webpack_require__ => { // webpackRuntimeModules
 /******/ var __webpack_exec__ = (moduleId) => (__webpack_require__(__webpack_require__.s = moduleId))
-/******/ __webpack_require__.O(0, [737,370,982,716,352,788,944,517,37,574,514,84,639,935,755,56,427,916,685,792,633,98,222,52,741,562,960,898,382,756,95,213,512,299,196,371,696], () => (__webpack_exec__(2629)));
+/******/ __webpack_require__.O(0, [737,370,982,716,352,788,944,517,938,37,574,514,242,84,639,935,755,56,427,916,796,114,342,685,792,633,457,98,605,12,222,52,741,562,960,898,382,756,249,95,213,512,299,196,908,371,696], () => (__webpack_exec__(2629)));
 /******/ var __webpack_exports__ = __webpack_require__.O();
 /******/ }
 ]);
