@@ -108,6 +108,7 @@ const styles = () => createStyles({
 		top: 0,
 	},
 	list__loaderSvg: { color: "#1EA4CE" },
+	list__noItemFound: { color: "#525252", fontStyle: "italic" },
 	list__sideContainer: {
 		"& > :not(:last-child)": { marginBottom: "2rem" },
 	},
@@ -241,20 +242,28 @@ export const View = withStyles(styles)(
 								}} />
 							) : (
 								<>
-									<Paper className={classes.list__container} elevation={2}>
-										<Grid container spacing={2}>
-											{items.map((item) => (
-												<Grid item key={item.slug} xs={12} lg={3}>
-													<ItemCard item={item} label="cart" />
-												</Grid>
-											))}
-										</Grid>
-									</Paper>
-									<Pagination
-										currentPage={currentPage}
-										navigateToPage={navigateToPage}
-										pageCount={pageCount}
-									/>
+									{items.length === 0
+										? (
+											<Typography className={classes.list__noItemFound}>{t("Feature:Items:List:noItemFound")}</Typography>
+										) : (
+											<>
+												<Paper className={classes.list__container} elevation={2}>
+													<Grid container spacing={2}>
+														{items.map((item) => (
+															<Grid item key={item.slug} xs={12} lg={3}>
+																<ItemCard item={item} label="cart" />
+															</Grid>
+														))}
+													</Grid>
+												</Paper>
+												<Pagination
+													currentPage={currentPage}
+													navigateToPage={navigateToPage}
+													pageCount={pageCount}
+												/>
+											</>
+										)
+									}
 								</>
 							)
 						}
