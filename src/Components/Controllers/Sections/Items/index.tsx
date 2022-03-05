@@ -1,5 +1,7 @@
-import { createStyles, Theme, withStyles, WithStyles } from "@material-ui/core";
+import { createStyles, Grid, Theme, useMediaQuery, withStyles, WithStyles } from "@material-ui/core";
+import { useTheme } from "@material-ui/core/styles";
 import React, { memo } from "react";
+import { Cart } from "../..//Features/Cart";
 import { ItemsList } from "../../Features/Items/List";
 
 // #region TYPES
@@ -14,6 +16,7 @@ interface ItemsSectionProps {
 
 // #region CONSTANTS
 const styles = ({ breakpoints }: Theme) => createStyles({
+	section__cartContainer: { border: "8px solid #1EA4CE", borderRadius: "2px", display: "flex", maxHeight: "500px" },
 	section__container: {
 		backgroundColor: "#FAFAFA",
 		padding: "3rem 6rem 9rem",
@@ -30,11 +33,28 @@ const styles = ({ breakpoints }: Theme) => createStyles({
  */
 export const ItemsSection = withStyles(styles)(
 	memo(
-		({ classes, label }: ItemsSectionProps & WithStyles<typeof styles>) => (
-			<div className={classes.section__container}>
-				<ItemsList label={`${label}.list`} />
-			</div>
-		),
+		({ classes, label }: ItemsSectionProps & WithStyles<typeof styles>) => {
+			const mdBreakpoint = useMediaQuery(useTheme().breakpoints.up("md"));
+
+			// #region RENDERING
+			return (
+				<div className={classes.section__container}>
+					<Grid container spacing={2}>
+						<Grid item md={9} xs={12}>
+							<ItemsList label={`${label}.list`} />
+						</Grid>
+						{mdBreakpoint && (
+							<Grid item md={3}>
+								<div className={classes.section__cartContainer}>
+									<Cart label="cart" />
+								</div>
+							</Grid>
+						)}
+					</Grid>
+				</div>
+			);
+			// #endregion
+		},
 	),
 );
 // #endregion
