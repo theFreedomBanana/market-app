@@ -11,10 +11,10 @@ import { Company } from "../../../../../Classes/Company";
 import { Item, ItemType } from "../../../../../Classes/Item";
 import { Store } from "../../../../../Store";
 import { ACTIONS } from "../../../../../Store/actions";
-import { Pagination } from "../../../Utility/Pagination";
-import { FilterButton, FilterButtonProps } from "../../../Utility/FilterButton";
-import { FilterCheckbox } from "../../../Utility/FilterCheckbox";
-import { SortRadio } from "../../../Utility/SortRadio";
+import { Pagination } from "../../../Utilities/Pagination";
+import { FilterButton, FilterButtonProps } from "../../../Utilities/FilterButton";
+import { FilterCheckbox } from "../../../Utilities/FilterCheckbox";
+import { SortRadio } from "../../../Utilities/SortRadio";
 import { Cart } from "../../Cart";
 import { ItemCard } from "../Card";
 
