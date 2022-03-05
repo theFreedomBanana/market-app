@@ -67,7 +67,7 @@ function* fetchRecords(actionParams: FetchRecordsParams) {
 	const limit = actionParams.data.limit ? `&_limit=${actionParams.data.limit}` : "";
 	const filter = actionParams.data.filters
 		? actionParams.data.filters.reduce(
-			(reduction: string, { key, value }: Required<FetchRecordsParams["data"]>["filters"][0]) => reduction + `&${key}=${value}`,
+			(reduction: string, { key, value }: Required<FetchRecordsParams["data"]>["filters"][0]) => reduction + `&${key}_like=${value}`,
 			"",
 		) : "";
 	const sort = actionParams.data.sort ? `&_sort=${actionParams.data.sort.key}&_order=${actionParams.data.sort.value}` : "";

@@ -21,8 +21,10 @@
 				"previous": "Prev",
 				"products": "Products",
 				"searchBrand": "Search brand",
+				"searchTag": "Search tag",
 				"shirt": "Shirt",
-				"sorting": "Sorting"
+				"sorting": "Sorting",
+				"tags": "Tags"
 			}
 		}
 	},

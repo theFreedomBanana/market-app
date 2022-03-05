@@ -33,13 +33,17 @@ interface ItemsListSetup {
 	 */
 	readonly limit?: number;
 	/**
-	 * The text typed in the brans filter search input
+	 * The text typed in the manufaturer filter search input
 	 */
 	readonly manufacturerFilterSearchedtext?: string;
 	/**
 	 * A list of companies to filter on when searching for items
 	 */
 	readonly selectedCompanies?: string[];
+	/**
+	 * A list of tags to filter on when searching for items
+	 */
+	readonly selectedTags?: string[];
 	/**
 	 * Defines how the items are sorted when requested
 	 */
@@ -48,6 +52,14 @@ interface ItemsListSetup {
 	 * The position where the previous request was started
 	 */
 	readonly start?: number;
+	/**
+	 * An object where each key is a tag, and each value the number of items containing that tag in `item.tags`
+	 */
+	readonly tagsCount?: { [index: string]: number };
+	/**
+	 * The text typed in the tag filter search input
+	 */
+	readonly tagFilterSearchedtext?: string;
 }
 
 type ItemsListProps = {
@@ -140,6 +152,7 @@ export const ItemsList = connect(mapStateToProps)(
 					});
 					dispatch({ data: { className: "company", table: "companies" }, type: ACTIONS.FETCH_RECORDS_REQUEST });
 					dispatch({ data: { filter: "company", label }, type: ACTIONS.FETCH_COUNTS_REQUEST });
+					dispatch({ data: { filter: "tags", label }, type: ACTIONS.FETCH_COUNTS_REQUEST });
 				},
 				[dispatch, label],
 			);
@@ -194,6 +207,16 @@ export const ItemsList = connect(mapStateToProps)(
 					value: type,
 				})),
 				[t],
+			);
+
+			const tagFilterOptions = useMemo(
+				() => Object.entries(setup?.tagsCount || {}).map(([name, count]) => ({
+					checked: setup?.selectedTags?.includes(name) || false,
+					id: name,
+					textPrimary: name,
+					textSecondary: `(${count})`,
+				})).filter(({ textPrimary }) => textPrimary.toLowerCase().includes(setup?.tagFilterSearchedtext?.toLowerCase() || "")),
+				[setup?.selectedTags, setup?.tagsCount, setup?.tagFilterSearchedtext],
 			);
 			// #endregion
 
@@ -289,7 +312,7 @@ export const ItemsList = connect(mapStateToProps)(
 				[dispatch, label],
 			);
 
-			const filterItemsPerManufacturer = useCallback(
+			const filterItemsByManufacturer = useCallback(
 				(event: BaseSyntheticEvent) => {
 					if (event?.currentTarget) {
 						const { checked, value } = event.currentTarget;
@@ -321,23 +344,76 @@ export const ItemsList = connect(mapStateToProps)(
 				},
 				[dispatch, label, setup?.filters, setup?.limit, setup?.selectedCompanies, setup?.sort, setup?.start],
 			);
+
+			const updateTagsFilterList = useCallback(
+				(event: BaseSyntheticEvent) => {
+					const value = event?.currentTarget?.value;
+					setTimeout(
+						() => {
+							dispatch({
+								label,
+								tagFilterSearchedtext: value,
+								type: ACTIONS.UPDATE_FEATURE,
+							});
+						},
+						300,
+					);
+				},
+				[dispatch, label],
+			);
+
+			const filterItemsByTag = useCallback(
+				(event: BaseSyntheticEvent) => {
+					if (event?.currentTarget) {
+						const { checked, value } = event.currentTarget;
+						const selectedTags = [...setup?.selectedTags || []];
+						checked
+							? selectedTags.push(value)
+							: selectedTags.splice(selectedTags.indexOf(value), 1);
+						dispatch({
+							label,
+							selectedTags,
+							type: ACTIONS.UPDATE_FEATURE,
+						});
+
+						dispatch({
+							data: {
+								className: "item",
+								filters: checked
+									? (setup?.filters || []).concat({ key: "tags", value })
+									: (setup?.filters || []).filter((filter) => !(filter.key === "tags" && filter.value === value)),
+								label,
+								limit: setup?.limit,
+								sort: setup?.sort,
+								start: setup?.start,
+								table: "items",
+							},
+							type: ACTIONS.FETCH_RECORDS_REQUEST,
+						});
+					}
+				},
+				[dispatch, label, setup?.filters, setup?.limit, setup?.selectedTags, setup?.sort, setup?.start],
+			);
 			// #endregion
 
 			// #region RENDERING
 			return (
 				<View
 					currentPage={currentPage}
+					filterItemsByTag={filterItemsByTag}
 					filterItemsByType={filterItemsByType}
-					filterItemsPerManufacturer={filterItemsPerManufacturer}
+					filterItemsByManufacturer={filterItemsByManufacturer}
 					items={items}
 					manufacturerFilterOptions={manufacturerFilterOptions}
 					navigateToPage={navigateToPage}
 					pageCount={pageCount}
 					sortItemsBy={sortItemsBy}
 					sortOptions={sortOptions}
+					tagFilterOptions={tagFilterOptions}
 					typeFilterOptions={typeFilterOptions}
 					typeFilterSelectedValue={typeFilterSelectedValue}
 					updateManufacturersFilterList={updateManufacturersFilterList}
+					updateTagsFilterList={updateTagsFilterList}
 				/>
 			);
 			// #endregion

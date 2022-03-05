@@ -1,4 +1,4 @@
-import { Accordion, AccordionDetails, AccordionSummary, createStyles, Grid, Paper, Theme, Typography, useMediaQuery, withStyles, WithStyles } from "@material-ui/core";
+import { Accordion, AccordionDetails, AccordionSummary, createStyles, Grid, Paper, Typography, useMediaQuery, withStyles, WithStyles } from "@material-ui/core";
 import { useTheme } from "@material-ui/core/styles";
 import { CircularProgress } from "@mui/material";
 import React, { memo } from "react";
@@ -20,7 +20,11 @@ interface ItemsListViewProps {
 	/**
 	 * A callback triggered whenever a new manufacturer is selected in the company FilterCheckbox component
 	 */
-	readonly filterItemsPerManufacturer: FilterCheckboxProps["checkboxOnChangeEventHandler"];
+	readonly filterItemsByManufacturer: FilterCheckboxProps["checkboxOnChangeEventHandler"];
+	/**
+	 * A callback triggered whenever a new manufacturer is selected in the tag FilterCheckbox component
+	 */
+	readonly filterItemsByTag: FilterCheckboxProps["checkboxOnChangeEventHandler"];
 	/**
 	 * A callback triggered whenever a type is selected on the FilterButton component
 	 */
@@ -51,6 +55,11 @@ interface ItemsListViewProps {
 	 */
 	readonly sortOptions: SortRadioProps["options"];
 	/**
+	 * A list of manufacturers for the company FilterCheckbox component
+	 * Shaped as FilterOption (e.g { text, value })
+	 */
+	readonly tagFilterOptions: FilterCheckboxProps["options"];
+	/**
 	 * A list of options for the FilterButton component
 	 */
 	readonly typeFilterOptions: FilterButtonProps["options"];
@@ -62,11 +71,15 @@ interface ItemsListViewProps {
 	 * A callback triggered whenever a text is typed in the company FilterCheckbox text input
 	 */
 	readonly updateManufacturersFilterList: FilterCheckboxProps["textInputOnChangeEventHandler"];
+	/**
+	 * A callback triggered whenever a text is typed in the tag FilterCheckbox text input
+	 */
+	readonly updateTagsFilterList: FilterCheckboxProps["textInputOnChangeEventHandler"];
 }
 // #endregion
 
 // #endregion CONSTANTS
-const styles = ({ breakpoints }: Theme) => createStyles({
+const styles = () => createStyles({
 	list__cartContainer: { border: "8px solid #1EA4CE", borderRadius: "2px", display: "flex", maxHeight: "500px" },
 	list__container: { marginBottom: "2rem", padding: "1rem" },
 	list__filterAccordionDetails: { padding: 0 },
@@ -95,8 +108,8 @@ const styles = ({ breakpoints }: Theme) => createStyles({
 		top: 0,
 	},
 	list__loaderSvg: { color: "#1EA4CE" },
-	list__sortRadio: {
-		[breakpoints.up("md")]: { marginBottom: "2rem" },
+	list__sideContainer: {
+		"& > :not(:last-child)": { marginBottom: "2rem" },
 	},
 	list__title: {
 		backgroundColor: "#FAFAFA",
@@ -116,14 +129,14 @@ export const View = withStyles(styles)(
 	memo(
 		({
 			classes, currentPage,
-			filterItemsPerManufacturer, filterItemsByType,
+			filterItemsByManufacturer, filterItemsByTag, filterItemsByType,
 			items,
 			manufacturerFilterOptions,
 			navigateToPage,
 			pageCount,
 			sortItemsBy, sortOptions,
-			typeFilterOptions, typeFilterSelectedValue,
-			updateManufacturersFilterList,
+			tagFilterOptions, typeFilterOptions, typeFilterSelectedValue,
+			updateManufacturersFilterList, updateTagsFilterList,
 		}: ItemsListViewProps & WithStyles<typeof styles>) => {
 			const { t } = useTranslation();
 			const smBreakpoint = useMediaQuery(useTheme().breakpoints.down("sm"));
@@ -144,11 +157,6 @@ export const View = withStyles(styles)(
 										</AccordionSummary>
 										<AccordionDetails classes={{ root: classes.list__filterAccordionDetails }}>
 											<SortRadio
-												custom={{
-													formControlProps: {
-														classes: { root: classes.list__sortRadio },
-													},
-												}}
 												defaultOption={sortOptions[0]}
 												onChangeEventHandler={sortItemsBy}
 												options={sortOptions}
@@ -164,35 +172,53 @@ export const View = withStyles(styles)(
 										</AccordionSummary>
 										<AccordionDetails classes={{ root: classes.list__filterAccordionDetails }}>
 											<FilterCheckbox
-												checkboxOnChangeEventHandler={filterItemsPerManufacturer}
+												checkboxOnChangeEventHandler={filterItemsByManufacturer}
 												options={manufacturerFilterOptions}
 												placeholder={t("Feature:Items:List:searchBrand")}
 												textInputOnChangeEventHandler={updateManufacturersFilterList}
 											/>
 										</AccordionDetails>
 									</Accordion>
+									<Accordion>
+										<AccordionSummary
+											className={classes.list__filterAccordionSummary}
+											expandIcon={<ArrowDownIcon className={classes.list__filterAccordionIcon} />}
+										>
+											<Typography>{t("Feature:Items:List:tags")}</Typography>
+										</AccordionSummary>
+										<AccordionDetails classes={{ root: classes.list__filterAccordionDetails }}>
+											<FilterCheckbox
+												checkboxOnChangeEventHandler={filterItemsByTag}
+												options={tagFilterOptions}
+												placeholder={t("Feature:Items:List:searchTag")}
+												textInputOnChangeEventHandler={updateTagsFilterList}
+											/>
+										</AccordionDetails>
+									</Accordion>
 								</>
 							) : (
-								<>
+								<div className={classes.list__sideContainer}>
 									<SortRadio
-										custom={{
-											formControlProps: {
-												classes: { root: classes.list__sortRadio },
-											},
-										}}
 										defaultOption={sortOptions[0]}
 										label={t("Feature:Items:List:sorting")}
 										onChangeEventHandler={sortItemsBy}
 										options={sortOptions}
 									/>
 									<FilterCheckbox
-										checkboxOnChangeEventHandler={filterItemsPerManufacturer}
+										checkboxOnChangeEventHandler={filterItemsByManufacturer}
 										label={t("Feature:Items:List:brands")}
 										options={manufacturerFilterOptions}
 										placeholder={t("Feature:Items:List:searchBrand")}
 										textInputOnChangeEventHandler={updateManufacturersFilterList}
 									/>
-								</>
+									<FilterCheckbox
+										checkboxOnChangeEventHandler={filterItemsByTag}
+										label={t("Feature:Items:List:tags")}
+										options={tagFilterOptions}
+										placeholder={t("Feature:Items:List:searchTag")}
+										textInputOnChangeEventHandler={updateTagsFilterList}
+									/>
+								</div>
 							)
 						}
 					</Grid>
