@@ -1,6 +1,16 @@
 import { createStyles, Theme, withStyles, WithStyles } from "@material-ui/core";
 import React, { memo } from "react";
-import { ItemsList } from "../../Controllers/Features/Items/List";
+import { ItemsList } from "../../Features/Items/List";
+
+// #region TYPES
+interface ItemsSectionProps {
+	/**
+	 * The name of the section
+	 */
+	label: string;
+}
+// #endregion
+
 
 // #region CONSTANTS
 const styles = ({ breakpoints }: Theme) => createStyles({
@@ -16,18 +26,17 @@ const styles = ({ breakpoints }: Theme) => createStyles({
 
 // #region COMPONENT
 /**
- * The main component
- * If charge of rendering the features according to navigation
+ * A container component in charge of rendering everything item related
  */
-export const ApplicationSection = withStyles(styles)(
+export const ItemsSection = withStyles(styles)(
 	memo(
-		({ classes }: WithStyles<typeof styles>) => (
+		({ classes, label }: ItemsSectionProps & WithStyles<typeof styles>) => (
 			<div className={classes.section__container}>
-				<ItemsList label="item.list" />
+				<ItemsList label={`${label}.list`} />
 			</div>
-		)
+		),
 	),
 );
 // #endregion
 
-ApplicationSection.displayName = "applicationSection";
+ItemsSection.displayName = "ItemsSection";
