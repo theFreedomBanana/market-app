@@ -1,10 +1,10 @@
 import { Checkbox, CheckboxProps, createStyles, FormControl, FormControlLabel, FormControlLabelProps, FormControlProps, FormGroup, FormGroupProps, FormLabel, FormLabelProps, Paper, PaperProps, TextField, TextFieldProps, Typography, TypographyProps, withStyles, WithStyles } from "@material-ui/core";
-import React, { ChangeEvent, memo } from "react";
+import React, { BaseSyntheticEvent, memo } from "react";
 import CheckboxIcon from "../../../../../res/icons/checkbox.svg";
 import CheckmarkIcon from "../../../../../res/icons/checkmark.svg";
 
 // #region TYPES
-interface CheckboxOption {
+export interface CheckboxOption {
 	/**
 	 * True if the value is selected, false otherwise
 	 */
@@ -27,7 +27,7 @@ export interface FilterCheckboxProps {
 	/**
 	 * Callback trigered when user check/uncheck a checkbox
 	 */
-	readonly checkboxOnChangeEventHandler: (event: ChangeEvent<HTMLInputElement>) => void;
+	readonly checkboxOnChangeEventHandler: (event: BaseSyntheticEvent) => void;
 	/**
 	 * An object used to passed down MUI properties
 	 * Enable to customize component from the outside
@@ -85,7 +85,7 @@ export interface FilterCheckboxProps {
 	/**
 	 * Callback trigered when user types in the text input
 	 */
-	readonly textInputOnChangeEventHandler: (event: ChangeEvent<HTMLInputElement>) => void;
+	readonly textInputOnChangeEventHandler: (event: BaseSyntheticEvent) => void;
 }
 // #endregion
 

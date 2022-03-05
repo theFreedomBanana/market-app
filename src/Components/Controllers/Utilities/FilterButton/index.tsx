@@ -1,9 +1,9 @@
 import { createStyles, withStyles, WithStyles } from "@material-ui/core";
 import clsx from "clsx";
-import React, { memo, MouseEvent } from "react";
+import React, { BaseSyntheticEvent, memo } from "react";
 
 // #region CONSTANTS
-interface FilterOption {
+export interface FilterOption {
 	/**
 	 * The text to display
 	 */
@@ -18,7 +18,7 @@ export interface FilterButtonProps {
 	/**
 	 * Callback triggered when an option is selected
 	 */
-	onSelectCallback: (event: MouseEvent<HTMLInputElement>) => void;
+	onSelectCallback: (event: BaseSyntheticEvent) => void;
 	/**
 	 * A list of options to display
 	 */

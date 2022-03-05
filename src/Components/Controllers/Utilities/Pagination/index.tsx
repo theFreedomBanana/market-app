@@ -6,7 +6,7 @@ import ArrowLeftIcon from "../../../../../res/icons/arrowLeft.svg";
 import ArrowRightIcon from "../../../../../res/icons/arrowRight.svg";
 
 // #region TYPES
-interface PaginationProps {
+export interface PaginationProps {
 	/**
 	 * The selected page.
 	 */

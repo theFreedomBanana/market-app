@@ -1,10 +1,10 @@
 import { createStyles, FormControl, FormControlLabel, FormControlLabelProps, FormControlProps, FormLabel, FormLabelProps, Paper, PaperProps, Radio, RadioGroup, RadioGroupProps, RadioProps, withStyles, WithStyles } from "@material-ui/core";
-import React, { ChangeEvent, memo } from "react";
+import React, { BaseSyntheticEvent, memo } from "react";
 import CheckmarkIcon from "../../../../../res/icons/checkmark.svg";
 import RadioIcon from "../../../../../res/icons/radio.svg";
 
 // #region TYPES
-interface RadioOption {
+export interface RadioOption {
 	/**
 	 * The value that will be passed when selected
 	 */
@@ -15,7 +15,7 @@ interface RadioOption {
 	readonly text: string;
 }
 
-interface SortRadioProps {
+export interface SortRadioProps {
 	/**
 	 * The selected option when rendering the first time
 	 */
@@ -57,7 +57,7 @@ interface SortRadioProps {
 	/**
 	 * Callback trigered when user change selected value
 	 */
-	readonly onChangeEventHandler: (event: ChangeEvent<HTMLInputElement>) => void;
+	readonly onChangeEventHandler: (event: BaseSyntheticEvent) => void;
 	/**
 	 * A list of options to display as radio
 	 */
