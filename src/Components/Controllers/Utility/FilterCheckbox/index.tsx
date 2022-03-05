@@ -23,7 +23,7 @@ interface CheckboxOption {
 	readonly textSecondary?: string;
 }
 
-interface SortRadioProps {
+export interface FilterCheckboxProps {
 	/**
 	 * Callback trigered when user check/uncheck a checkbox
 	 */
@@ -75,7 +75,7 @@ interface SortRadioProps {
 	 */
 	readonly label?: string;
 	/**
-	 * A list of options to display as radio
+	 * A list of options to display
 	 */
 	readonly options: CheckboxOption[];
 	/**
@@ -135,7 +135,7 @@ export const FilterCheckbox = withStyles(styles)(
 			options,
 			placeholder,
 			textInputOnChangeEventHandler,
-		}: WithStyles<typeof styles> & SortRadioProps) => (
+		}: WithStyles<typeof styles> & FilterCheckboxProps) => (
 			<FormControl className={classes.filter__container} {...custom?.formControlProps}>
 				<FormLabel className={classes.filter__label} {...custom?.formLabelProps}>{label}</FormLabel>
 				<Paper className={classes.filter__subContainer} {...custom?.paperProps}>
