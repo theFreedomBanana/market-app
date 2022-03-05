@@ -34,17 +34,17 @@ const styles = ({ breakpoints }: Theme) => createStyles({
 export const ItemsSection = withStyles(styles)(
 	memo(
 		({ classes, label }: ItemsSectionProps & WithStyles<typeof styles>) => {
-			const mdBreakpoint = useMediaQuery(useTheme().breakpoints.up("md"));
+			const lgBreakpoint = useMediaQuery(useTheme().breakpoints.up("lg"));
 
 			// #region RENDERING
 			return (
 				<div className={classes.section__container}>
 					<Grid container spacing={2}>
-						<Grid item md={9} xs={12}>
+						<Grid item lg={9} xs={12}>
 							<ItemsList label={`${label}.list`} />
 						</Grid>
-						{mdBreakpoint && (
-							<Grid item md={3}>
+						{lgBreakpoint && (
+							<Grid item lg={3}>
 								<div className={classes.section__cartContainer}>
 									<Cart label="cart" />
 								</div>
