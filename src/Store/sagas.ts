@@ -63,6 +63,9 @@ interface FetchRecordsParams {
 
 function* fetchRecords(actionParams: FetchRecordsParams) {
 	const { className, label, table } = actionParams.data;
+	if (label) {
+		yield put({ isLoading: true, label, type: ACTIONS.UPDATE_FEATURE });
+	}
 	const start = actionParams.data.start ? `&_start=${actionParams.data.start}` : "";
 	const limit = actionParams.data.limit ? `&_limit=${actionParams.data.limit}` : "";
 	const filter = actionParams.data.filters
@@ -81,6 +84,7 @@ function* fetchRecords(actionParams: FetchRecordsParams) {
 				count: parseInt(count, 10),
 				fetchedSlugs: records.map(({ slug }) => slug),
 				filters: actionParams.data.filters,
+				isLoading: false,
 				label,
 				limit: actionParams.data.limit,
 				sort: actionParams.data.sort,

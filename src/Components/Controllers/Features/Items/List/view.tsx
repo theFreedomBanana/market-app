@@ -30,6 +30,10 @@ interface ItemsListViewProps {
 	 */
 	readonly filterItemsByType: FilterButtonProps["onSelectCallback"];
 	/**
+	 * True if an item request is pending, false otherwise
+	 */
+	readonly isLoading?: boolean
+	/**
 	 * A list of items to display
 	 */
 	readonly items?: Item[];
@@ -109,6 +113,7 @@ const styles = () => createStyles({
 	},
 	list__loaderSvg: { color: "#1EA4CE" },
 	list__noItemFound: { color: "#525252", fontStyle: "italic" },
+	list__productsContainer: { position: "relative" },
 	list__sideContainer: {
 		"& > :not(:last-child)": { marginBottom: "2rem" },
 	},
@@ -131,7 +136,7 @@ export const View = withStyles(styles)(
 		({
 			classes, currentPage,
 			filterItemsByManufacturer, filterItemsByTag, filterItemsByType,
-			items,
+			isLoading, items,
 			manufacturerFilterOptions,
 			navigateToPage,
 			pageCount,
@@ -223,7 +228,7 @@ export const View = withStyles(styles)(
 							)
 						}
 					</Grid>
-					<Grid item md={8} xs={12}>
+					<Grid className={classes.list__productsContainer} item md={8} xs={12}>
 						<Typography className={classes.list__title} variant="h4">{t("Feature:Items:List:products")}</Typography>
 						{typeFilterOptions && (
 							<div className={classes.list__filterContainer}>
@@ -234,7 +239,7 @@ export const View = withStyles(styles)(
 								/>
 							</div>
 						)}
-						{!(items)
+						{isLoading
 							? (
 								<CircularProgress classes={{
 									root: classes.list__loaderContainer,
@@ -242,7 +247,7 @@ export const View = withStyles(styles)(
 								}} />
 							) : (
 								<>
-									{items.length === 0
+									{!(items) || items.length === 0
 										? (
 											<Typography className={classes.list__noItemFound}>{t("Feature:Items:List:noItemFound")}</Typography>
 										) : (

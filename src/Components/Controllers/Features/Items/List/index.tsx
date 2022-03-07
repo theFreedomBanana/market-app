@@ -33,6 +33,10 @@ interface ItemsListSetup {
 	 */
 	readonly limit?: number;
 	/**
+	 * True if an item request is pending, false otherwise
+	 */
+	readonly isLoading?: boolean;
+	/**
 	 * The text typed in the manufaturer filter search input
 	 */
 	readonly manufacturerFilterSearchedtext?: string;
@@ -403,6 +407,7 @@ export const ItemsList = connect(mapStateToProps)(
 					filterItemsByTag={filterItemsByTag}
 					filterItemsByType={filterItemsByType}
 					filterItemsByManufacturer={filterItemsByManufacturer}
+					isLoading={setup?.isLoading}
 					items={items}
 					manufacturerFilterOptions={manufacturerFilterOptions}
 					navigateToPage={navigateToPage}
