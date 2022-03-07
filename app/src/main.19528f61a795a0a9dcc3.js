@@ -961,7 +961,7 @@ exports.ItemsList = (0, react_redux_1.connect)(mapStateToProps)((0, react_1.memo
     }, [dispatch, label, setup === null || setup === void 0 ? void 0 : setup.filters, setup === null || setup === void 0 ? void 0 : setup.limit, setup === null || setup === void 0 ? void 0 : setup.selectedTags, setup === null || setup === void 0 ? void 0 : setup.sort, setup === null || setup === void 0 ? void 0 : setup.start]);
     // #endregion
     // #region RENDERING
-    return (react_1.default.createElement(view_1.View, { currentPage: currentPage, filterItemsByTag: filterItemsByTag, filterItemsByType: filterItemsByType, filterItemsByManufacturer: filterItemsByManufacturer, items: items, manufacturerFilterOptions: manufacturerFilterOptions, navigateToPage: navigateToPage, pageCount: pageCount, sortItemsBy: sortItemsBy, sortOptions: sortOptions, tagFilterOptions: tagFilterOptions, typeFilterOptions: typeFilterOptions, typeFilterSelectedValue: typeFilterSelectedValue, updateManufacturersFilterList: updateManufacturersFilterList, updateTagsFilterList: updateTagsFilterList }));
+    return (react_1.default.createElement(view_1.View, { currentPage: currentPage, filterItemsByTag: filterItemsByTag, filterItemsByType: filterItemsByType, filterItemsByManufacturer: filterItemsByManufacturer, isLoading: setup === null || setup === void 0 ? void 0 : setup.isLoading, items: items, manufacturerFilterOptions: manufacturerFilterOptions, navigateToPage: navigateToPage, pageCount: pageCount, sortItemsBy: sortItemsBy, sortOptions: sortOptions, tagFilterOptions: tagFilterOptions, typeFilterOptions: typeFilterOptions, typeFilterSelectedValue: typeFilterSelectedValue, updateManufacturersFilterList: updateManufacturersFilterList, updateTagsFilterList: updateTagsFilterList }));
     // #endregion
 }));
 // #endregion
@@ -1046,6 +1046,7 @@ const styles = () => (0, core_1.createStyles)({
     },
     list__loaderSvg: { color: "#1EA4CE" },
     list__noItemFound: { color: "#525252", fontStyle: "italic" },
+    list__productsContainer: { position: "relative" },
     list__sideContainer: {
         "& > :not(:last-child)": { marginBottom: "2rem" },
     },
@@ -1062,10 +1063,9 @@ const styles = () => (0, core_1.createStyles)({
 /**
  * A view for the ItemsList component
  */
-exports.View = (0, core_1.withStyles)(styles)((0, react_1.memo)(({ classes, currentPage, filterItemsByManufacturer, filterItemsByTag, filterItemsByType, items, manufacturerFilterOptions, navigateToPage, pageCount, sortItemsBy, sortOptions, tagFilterOptions, typeFilterOptions, typeFilterSelectedValue, updateManufacturersFilterList, updateTagsFilterList, }) => {
+exports.View = (0, core_1.withStyles)(styles)((0, react_1.memo)(({ classes, currentPage, filterItemsByManufacturer, filterItemsByTag, filterItemsByType, isLoading, items, manufacturerFilterOptions, navigateToPage, pageCount, sortItemsBy, sortOptions, tagFilterOptions, typeFilterOptions, typeFilterSelectedValue, updateManufacturersFilterList, updateTagsFilterList, }) => {
     const { t } = (0, react_i18next_1.useTranslation)();
     const smBreakpoint = (0, core_1.useMediaQuery)((0, styles_1.useTheme)().breakpoints.down("sm"));
-    console.log("items: ", items);
     // #region RENDERING
     return (react_1.default.createElement(core_1.Grid, { container: true, spacing: 2 },
         react_1.default.createElement(core_1.Grid, { item: true, md: 4, xs: 12 }, smBreakpoint
@@ -1088,15 +1088,15 @@ exports.View = (0, core_1.withStyles)(styles)((0, react_1.memo)(({ classes, curr
             react_1.default.createElement(SortRadio_1.SortRadio, { defaultOption: sortOptions[0], label: t("Feature:Items:List:sorting"), onChangeEventHandler: sortItemsBy, options: sortOptions }),
             react_1.default.createElement(FilterCheckbox_1.FilterCheckbox, { checkboxOnChangeEventHandler: filterItemsByManufacturer, label: t("Feature:Items:List:brands"), options: manufacturerFilterOptions, placeholder: t("Feature:Items:List:searchBrand"), textInputOnChangeEventHandler: updateManufacturersFilterList }),
             react_1.default.createElement(FilterCheckbox_1.FilterCheckbox, { checkboxOnChangeEventHandler: filterItemsByTag, label: t("Feature:Items:List:tags"), options: tagFilterOptions, placeholder: t("Feature:Items:List:searchTag"), textInputOnChangeEventHandler: updateTagsFilterList })))),
-        react_1.default.createElement(core_1.Grid, { item: true, md: 8, xs: 12 },
+        react_1.default.createElement(core_1.Grid, { className: classes.list__productsContainer, item: true, md: 8, xs: 12 },
             react_1.default.createElement(core_1.Typography, { className: classes.list__title, variant: "h4" }, t("Feature:Items:List:products")),
             typeFilterOptions && (react_1.default.createElement("div", { className: classes.list__filterContainer },
                 react_1.default.createElement(FilterButton_1.FilterButton, { onSelectCallback: filterItemsByType, options: typeFilterOptions, selectedValue: typeFilterSelectedValue }))),
-            !(items)
+            isLoading
                 ? (react_1.default.createElement(material_1.CircularProgress, { classes: {
                         root: classes.list__loaderContainer,
                         svg: classes.list__loaderSvg,
-                    } })) : (react_1.default.createElement(react_1.default.Fragment, null, items.length === 0
+                    } })) : (react_1.default.createElement(react_1.default.Fragment, null, !(items) || items.length === 0
                 ? (react_1.default.createElement(core_1.Typography, { className: classes.list__noItemFound }, t("Feature:Items:List:noItemFound"))) : (react_1.default.createElement(react_1.default.Fragment, null,
                 react_1.default.createElement(core_1.Paper, { className: classes.list__container, elevation: 2 },
                     react_1.default.createElement(core_1.Grid, { container: true, spacing: 2 }, items.map((item) => (react_1.default.createElement(core_1.Grid, { item: true, key: item.slug, xs: 12, lg: 3 },
@@ -1798,6 +1798,9 @@ const effects_1 = __webpack_require__(4857);
 const actions_1 = __webpack_require__(5890);
 function* fetchRecords(actionParams) {
     const { className, label, table } = actionParams.data;
+    if (label) {
+        yield (0, effects_1.put)({ isLoading: true, label, type: actions_1.ACTIONS.UPDATE_FEATURE });
+    }
     const start = actionParams.data.start ? `&_start=${actionParams.data.start}` : "";
     const limit = actionParams.data.limit ? `&_limit=${actionParams.data.limit}` : "";
     const filter = actionParams.data.filters
@@ -1813,6 +1816,7 @@ function* fetchRecords(actionParams) {
                 count: parseInt(count, 10),
                 fetchedSlugs: records.map(({ slug }) => slug),
                 filters: actionParams.data.filters,
+                isLoading: false,
                 label,
                 limit: actionParams.data.limit,
                 sort: actionParams.data.sort,
